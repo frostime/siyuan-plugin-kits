@@ -34,7 +34,7 @@ export const openBlock = (id: string, app?: App) => {
     }
 };
 
-export const getPlugin = (name: string): Plugin => {
+export const findPlugin = (name: string): Plugin => {
     let plugin = window.siyuan.ws.app.plugins.find(p => p.name === name);
     return plugin;
 }

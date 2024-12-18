@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2024 by frostime. All Rights Reserved.
+ * @Author       : frostime
+ * @Date         : 2024-12-18 20:38:19
+ * @FilePath     : /src/plugin-instance.ts
+ * @LastEditTime : 2024-12-18 22:53:03
+ * @Description  : 
+ */
 import { Plugin, App, Custom, openTab } from "siyuan";
 
 let _plugin: Plugin;
@@ -16,7 +24,7 @@ export const unregisterPlugin = () => {
     i18n = null;
 }
 
-export const plugin = new Proxy(_plugin, {
+export const thisPlugin = new Proxy(_plugin, {
     get(target, prop) {
         return target[prop];
     }
