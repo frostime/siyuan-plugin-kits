@@ -7,6 +7,7 @@
  * @Description  : 
  * 
  */
-export { SettingUtils } from "./setting-utils";
-export { deepMerge } from "./utils";
-export { useLocalDeviceStorage } from "./local-storage";
+export * from "./setting-utils";
+export * from "./utils";
+export * from "./local-storage";
+export * from "./types";

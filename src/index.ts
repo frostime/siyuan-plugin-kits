@@ -3,18 +3,18 @@
  * @Author       : frostime
  * @Date         : 2024-10-09 21:09:34
  * @FilePath     : /src/index.ts
- * @LastEditTime : 2024-12-18 22:13:19
+ * @LastEditTime : 2024-12-18 22:30:56
  * @Description  : 
  */
 
-export { matchIDFormat, isMobile, openBlock, getPlugin } from "./siyuan-instance";
-export { registerPlugin, unregisterPlugin, plugin, app, i18n } from "./plugin-instance";
-export { SettingUtils, useLocalDeviceStorage, deepMerge } from "./settings";
+export * from "./siyuan-instance";
+export * from "./plugin-instance";
+export * from "./settings";
 export * as api from "./api";
 
-export { simpleDialog, confirmDialog, inputDialog } from "./dialog";
-export { debounce, throttle, PromiseLimitPool } from "./performance";
+export * from "./dialog";
+export * from "./performance";
 
-export { parseSiYuanTimestamp, formatDateTime, SiYuanDate } from "./time";
-export { updateStyleDom, removeStyleDom } from "./style";
-export { html2frag, html2ele } from "./misc";
+export * from "./time";
+export * from "./style";
+export * from "./misc";
