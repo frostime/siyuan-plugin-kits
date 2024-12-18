@@ -1,0 +1,8 @@
+dist/
+node_modules/**
+test
+*.tgz
+*.zip
+*.tar.gz
+
+pnpm-lock.yaml
