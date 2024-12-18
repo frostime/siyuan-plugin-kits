@@ -5,7 +5,7 @@
   "description": "A utility for SiYuan plugin development",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/frostime/siyuan-plugin-kits.git"
   },
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
