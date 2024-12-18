@@ -3,13 +3,13 @@
  * @Author       : frostime
  * @Date         : 2024-10-09 21:09:34
  * @FilePath     : /src/index.ts
- * @LastEditTime : 2024-12-18 20:46:42
+ * @LastEditTime : 2024-12-18 21:25:39
  * @Description  : 
  */
 
 export { matchIDFormat, isMobile, openBlock, getPlugin } from "./siyuan-instance";
 export { registerPlugin, unregisterPlugin, plugin, app, i18n } from "./plugin-instance";
-export { SettingUtils, useDeviceStorage, deepMerge } from "./settings";
+export { SettingUtils, useLocalDeviceStorage, deepMerge } from "./settings";
 export * as api from "./api";
 
 export { simpleDialog, confirmDialog } from "./dialog";

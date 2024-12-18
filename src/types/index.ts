@@ -2,12 +2,12 @@
  * Copyright (c) 2024 by frostime. All Rights Reserved.
  * @Author       : frostime
  * @Date         : 2023-08-15 10:28:10
- * @FilePath     : /src/types/index.d.ts
- * @LastEditTime : 2024-06-08 20:50:53
+ * @FilePath     : /src/types/index.ts
+ * @LastEditTime : 2024-12-18 21:26:48
  * @Description  : Frequently used data structures in SiYuan
  */
 export * from './api';
-export * from './setting';
+export * from '@/settings/types';
 
 export type DocumentId = string;
 export type BlockId = string;

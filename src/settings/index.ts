@@ -9,4 +9,4 @@
  */
 export { SettingUtils } from "./setting-utils";
 export { deepMerge } from "./utils";
-export { useDeviceStorage } from "./device-storage";
+export { useLocalDeviceStorage } from "./local-storage";

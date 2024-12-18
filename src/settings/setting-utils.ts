@@ -3,12 +3,13 @@
  * @Author       : frostime
  * @Date         : 2023-12-17 18:28:19
  * @FilePath     : /src/settings/setting-utils.ts
- * @LastEditTime : 2024-12-18 00:50:05
+ * @LastEditTime : 2024-12-18 21:24:47
  * @Description  : 
  */
 
 import { Plugin, Setting } from 'siyuan';
-import { TSettingItemType, ISettingUtilsItem } from '../types';
+import { TSettingItemType, ISettingUtilsItem } from './types';
+import { useLocalDeviceStorage } from './local-storage';
 
 /**
  * The default function to get the value of the element
@@ -83,6 +84,9 @@ export class SettingUtils {
     settings: Map<string, ISettingUtilsItem> = new Map();
     elements: Map<string, HTMLElement> = new Map();
 
+    private deviceStorage: Awaited<ReturnType<typeof useLocalDeviceStorage>> | null = null;
+    private localOnlyItems: Set<string> = new Set();
+
     constructor(args: {
         plugin: Plugin,
         name?: string,
@@ -117,11 +121,18 @@ export class SettingUtils {
     }
 
     async load() {
+        if (this.localOnlyItems.size > 0 && this.deviceStorage === null) {
+            this.deviceStorage = await useLocalDeviceStorage(this.plugin);
+        }
+
         let data = await this.plugin.loadData(this.file);
         console.debug('Load config:', data);
         if (data) {
             for (let [key, item] of this.settings) {
                 item.value = data?.[key] ?? item.value;
+                if (this.localOnlyItems.has(key)) {
+                    item.value = this.deviceStorage?.get(key) ?? item.value;
+                }
             }
         }
         this.plugin.data[this.name] = this.dump();
@@ -130,7 +141,14 @@ export class SettingUtils {
 
     async save(data?: any) {
         data = data ?? this.dump();
-        await this.plugin.saveData(this.file, this.dump());
+        if (this.localOnlyItems.size > 0 && this.deviceStorage) {
+            for (let key of this.localOnlyItems) {
+                this.deviceStorage.set(key, data[key], false);
+            }
+            await this.deviceStorage.save();
+        }
+
+        await this.plugin.saveData(this.file, data);
         console.debug('Save config:', data);
         return data;
     }
@@ -239,7 +257,7 @@ export class SettingUtils {
         return data;
     }
 
-    addItem(item: ISettingUtilsItem) {
+    addItem(item: ISettingUtilsItem, style?: Record<string, any>) {
         this.settings.set(item.key, item);
         const IsCustom = item.type === 'custom';
         let error = IsCustom && (item.createElement === undefined || item.getEleVal === undefined || item.setEleVal === undefined);
@@ -265,6 +283,9 @@ export class SettingUtils {
                 createActionElement: () => {
                     this.updateElementFromValue(item.key);
                     let element = this.getElement(item.key);
+                    if (style) {
+                        Object.assign(element.style, style);
+                    }
                     return element;
                 }
             });
@@ -276,10 +297,17 @@ export class SettingUtils {
                 createActionElement: () => {
                     let val = this.get(item.key);
                     let element = item.createElement(val);
+                    if (style) {
+                        Object.assign(element.style, style);
+                    }
                     this.elements.set(item.key, element);
                     return element;
                 }
             });
+        }
+
+        if (item.localOnly) {
+            this.localOnlyItems.add(item.key);
         }
     }
 
