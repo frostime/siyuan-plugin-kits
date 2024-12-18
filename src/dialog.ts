@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-03-23 21:37:33
  * @FilePath     : /src/dialog.ts
- * @LastEditTime : 2024-12-18 00:19:26
+ * @LastEditTime : 2024-12-18 21:32:11
  * @Description  : 对话框相关工具
  */
 import { Dialog } from "siyuan";
@@ -73,20 +73,63 @@ export const confirmDialog = (args: IConfirmDialogArgs) => {
         }
         dialog.destroy();
     });
-    return dialog;
+    return {
+        dialog,
+        close: dialog.destroy.bind(dialog)
+    };
 };
 
-
-export const confirmDialogSync = async (args: IConfirmDialogArgs) => {
-    return new Promise<HTMLElement>((resolve) => {
-        let newargs = {
-            ...args, confirm: (ele: HTMLElement) => {
-                resolve(ele);
-            }, cancel: (ele: HTMLElement) => {
-                resolve(ele);
+export const inputDialog = (args: {
+    title: string,
+    defaultText?: string,
+    confirm?: (text: string) => void,
+    type?: 'textline' | 'textarea',
+    width?: string,
+    height?: string,
+    fontSize?: string
+}) => {
+    const dialog = new Dialog({
+        title: args.title,
+        content: `<div class="fn__flex" style="height: 100%; flex: 1; padding: 16px 24px; overflow-y: auto">
+            <div class="ft__breakword fn__flex fn__flex-1" style="height: 100%;">
+                ${args.type === 'textarea'
+                ? `<textarea class="b3-text-field fn__block" style="font-size: ${args.fontSize || '17px'}; resize: none;" spellcheck="false">${args.defaultText || ''}</textarea>`
+                : `<input class="b3-text-field fn__flex-center" style="flex: 1; font-size: ${args.fontSize || '17px'};" value="${args.defaultText || ''}">`
             }
-        };
-        // @ts-ignore
-        confirmDialog(newargs);
+            </div>
+        </div>
+        <div class="b3-dialog__action">
+            <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
+            <div class="fn__space"></div>
+            <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+        </div>`,
+        width: args.width,
+        height: args.height
     });
+
+    const inputElement = dialog.element.querySelector('textarea, input') as HTMLTextAreaElement | HTMLInputElement;
+
+    // Prevent Enter key from closing dialog
+    inputElement.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.stopImmediatePropagation();
+        }
+    });
+
+    const btnsElement = dialog.element.querySelectorAll('.b3-button');
+    btnsElement[0].addEventListener('click', () => {
+        dialog.destroy();
+    });
+
+    btnsElement[1].addEventListener('click', () => {
+        if (args.confirm) {
+            args.confirm(inputElement.value);
+        }
+        dialog.destroy();
+    });
+
+    return {
+        dialog,
+        close: dialog.destroy.bind(dialog)
+    };
 };

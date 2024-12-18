@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-10-09 21:09:34
  * @FilePath     : /src/index.ts
- * @LastEditTime : 2024-12-18 21:25:39
+ * @LastEditTime : 2024-12-18 21:32:37
  * @Description  : 
  */
 
@@ -12,7 +12,7 @@ export { registerPlugin, unregisterPlugin, plugin, app, i18n } from "./plugin-in
 export { SettingUtils, useLocalDeviceStorage, deepMerge } from "./settings";
 export * as api from "./api";
 
-export { simpleDialog, confirmDialog } from "./dialog";
+export { simpleDialog, confirmDialog, inputDialog } from "./dialog";
 export { debounce, throttle, PromiseLimitPool } from "./performance";
 
 export { parseSiYuanTimestamp, formatDateTime, SiYuanDate } from "./time";
