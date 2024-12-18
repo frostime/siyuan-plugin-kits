@@ -3,11 +3,11 @@
  * @Author       : frostime
  * @Date         : 2023-08-15 10:28:10
  * @FilePath     : /src/types/index.ts
- * @LastEditTime : 2024-12-18 21:26:48
+ * @LastEditTime : 2024-12-18 22:07:34
  * @Description  : Frequently used data structures in SiYuan
  */
 export * from './api';
-export * from '@/settings/types';
+export * from '../settings/types';
 
 export type DocumentId = string;
 export type BlockId = string;

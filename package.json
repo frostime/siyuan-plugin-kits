@@ -9,11 +9,21 @@
   },
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./api": {
+      "types": "./dist/types/api.d.ts",
+      "import": "./dist/api.mjs",
+      "require": "./dist/api.cjs"
+    }
+  },
   "files": [
-    "dist",
-    "README.md",
-    "README_zh_CN.md"
+    "dist"
   ],
   "scripts": {
     "build": "rollup -c",
@@ -22,9 +32,6 @@
   "keywords": [],
   "author": "frostime",
   "license": "MIT",
-  "peerDependencies": {
-    "solid-js": "^1.0.0"
-  },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-typescript": "^12.1.2",
