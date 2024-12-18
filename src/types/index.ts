@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2023-08-15 10:28:10
  * @FilePath     : /src/types/index.ts
- * @LastEditTime : 2024-12-18 22:07:34
+ * @LastEditTime : 2024-12-18 22:43:35
  * @Description  : Frequently used data structures in SiYuan
  */
 export * from './api';
@@ -51,7 +51,17 @@ export type BlockType =
     | 'av'
     | 'audio';
 
-export type BlockSubType = "d1" | "d2" | "s1" | "s2" | "s3" | "t1" | "t2" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "table" | "task" | "toggle" | "latex" | "quote" | "html" | "code" | "footnote" | "cite" | "collection" | "bookmark" | "attachment" | "comment" | "mindmap" | "spreadsheet" | "calendar" | "image" | "audio" | "video" | "other";
+
+export type BlockSubType = 
+    | 'h1' 
+    | 'h2' 
+    | 'h3' 
+    | 'h4' 
+    | 'h5' 
+    | 'h6' 
+    | 'o'
+    | 'u'
+    | 't';
 
 export type Block = {
     id: BlockId;
@@ -87,20 +97,4 @@ export type doOperation = {
     parentID: BlockId | DocumentId;
     previousID: BlockId;
     retData: null;
-}
-
-export interface Window {
-    siyuan: {
-        config: any;
-        notebooks: any;
-        menus: any;
-        dialogs: any;
-        blockPanels: any;
-        storage: any;
-        user: any;
-        ws: any;
-        languages: any;
-        emojis: any;
-    };
-    Lute: any;
 }
