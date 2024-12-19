@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-03-23 21:37:33
  * @FilePath     : /src/dialog.ts
- * @LastEditTime : 2024-12-18 21:32:11
+ * @LastEditTime : 2024-12-19 14:48:39
  * @Description  : 对话框相关工具
  */
 import { Dialog } from "siyuan";
@@ -27,16 +27,15 @@ export const simpleDialog = (args: {
     };
 }
 
-interface IConfirmDialogArgs {
+
+export const confirmDialog = (args: {
     title: string;
     content: string | HTMLElement | DocumentFragment;
     confirm?: (ele?: HTMLElement) => void;
     cancel?: (ele?: HTMLElement) => void;
     width?: string;
     height?: string;
-}
-
-export const confirmDialog = (args: IConfirmDialogArgs) => {
+}) => {
     const { title, content, confirm, cancel, width, height } = args;
 
     const dialog = new Dialog({

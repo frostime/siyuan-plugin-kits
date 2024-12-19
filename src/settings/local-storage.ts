@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-07-13 21:19:23
  * @FilePath     : /src/settings/local-storage.ts
- * @LastEditTime : 2024-12-18 21:10:19
+ * @LastEditTime : 2024-12-19 21:36:44
  * @Description  : 
  */
 import { Plugin } from "siyuan";
@@ -28,6 +28,12 @@ export const useLocalDeviceStorage = async (plugin: Plugin) => {
         },
         keys: () => {
             return Object.keys(config);
+        },
+        includes: (key: string | number) => {
+            if (config[key]) {
+                return true;
+            }
+            return false;
         },
         forEach: async (callback: (key: string | number, value: any) => void) => {
             for (let key in config) {
