@@ -3,14 +3,14 @@
  * @Author       : frostime
  * @Date         : 2024-06-08 20:36:30
  * @FilePath     : /src/const.ts
- * @LastEditTime : 2024-12-18 22:42:41
+ * @LastEditTime : 2024-12-19 13:57:01
  * @Description  : 
  */
 
 import { BlockSubType, BlockType } from "./types";
 
 
-const BlockTypeShort_ZH: Record<BlockType | BlockSubType, string> = {
+const BlockTypeName_ZH: Record<BlockType | BlockSubType, string> = {
     "d": "文档",
     "h": "标题",
     "h1": "一级标题",
@@ -38,7 +38,7 @@ const BlockTypeShort_ZH: Record<BlockType | BlockSubType, string> = {
     'audio': '音频'
 }
 
-const BlockTypeShort_EN: Record<BlockType | BlockSubType, string> = {
+const BlockTypeName_EN: Record<BlockType | BlockSubType, string> = {
     "d": "Document",
     "h": "Heading",
     "h1": "Heading 1",
@@ -66,7 +66,8 @@ const BlockTypeShort_EN: Record<BlockType | BlockSubType, string> = {
     'audio': 'Audio'
 }
 
-export const BlockTypeShort = window.siyuan.config.lang.startsWith('zh') ? BlockTypeShort_ZH : BlockTypeShort_EN;
+export const BlockTypeName = window.siyuan.config.lang.startsWith('zh') ? BlockTypeName_ZH : BlockTypeName_EN;
+export const BlockTypeShort = BlockTypeName; //alias
 
 
 export const BlockType2NodeType: { [key in BlockType]: string } = {

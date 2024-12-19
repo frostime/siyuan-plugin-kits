@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2024-12-18 22:53:03
+ * @LastEditTime : 2024-12-19 14:09:11
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab } from "siyuan";
@@ -24,11 +24,7 @@ export const unregisterPlugin = () => {
     i18n = null;
 }
 
-export const thisPlugin = new Proxy(_plugin, {
-    get(target, prop) {
-        return target[prop];
-    }
-});
+export const thisPlugin = () => _plugin;
 
 /**
  * 打开一个自定义的 tab

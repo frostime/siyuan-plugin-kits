@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-07-11 14:21:11
  * @FilePath     : /src/time.ts
- * @LastEditTime : 2024-12-18 20:34:31
+ * @LastEditTime : 2024-12-19 01:40:32
  * @Description  : 
  */
 
@@ -67,11 +67,13 @@ export const parseSiYuanTimestamp = (timestr: string) => {
     return new SiYuanDate(timestr.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1-$2-$3 $4:$5:$6'));
 }
 
-export const formatSiYuanTimestamp = (date: Date) => {
+export const formatSiYuanTimestamp = (date?: Date) => {
+    date = date ?? new Date();
     return formatDateTime('yyyyMMddHHmmss', date);
 }
 
-export const formatSiYuanDate = (date: Date) => {
+export const formatSiYuanDate = (date?: Date) => {
+    date = date ?? new Date();
     return formatDateTime('yyyyMMdd', date);
 }
 
@@ -88,7 +90,7 @@ const renderString = (template: string, data: { [key: string]: string }) => {
  * @param now 
  * @returns 
  */
-export const formatDateTime = (template: string, now?: Date) => {
+export const formatDateTime = (template: string = 'yyyy-MM-dd HH:mm:ss', now?: Date) => {
     now = now || new Date();
     let year = now.getFullYear();
     let month = now.getMonth() + 1;
@@ -96,6 +98,7 @@ export const formatDateTime = (template: string, now?: Date) => {
     let hour = now.getHours();
     let minute = now.getMinutes();
     let second = now.getSeconds();
+    template = template ?? 'yyyy-MM-dd HH:mm:ss';
     return renderString(template, {
         'yyyy': year.toString(),
         'MM': month.toString().padStart(2, '0'),
