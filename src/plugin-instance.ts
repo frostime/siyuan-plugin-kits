@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2024-12-21 19:23:25
+ * @LastEditTime : 2024-12-21 19:48:48
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab } from "siyuan";
@@ -44,7 +44,7 @@ export const openCustomTab = (args: {
 }) => {
     const plugin = args.plugin || _plugin;
     const opened = plugin.getOpenedTab();
-    if (opened[args.tabId]) {
+    if (!opened[args.tabId]) {
         plugin.addTab({
             'type': args.tabId,
             init(this: Custom) {
