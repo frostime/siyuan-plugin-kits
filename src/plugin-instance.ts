@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2024-12-21 15:11:14
+ * @LastEditTime : 2024-12-21 19:23:25
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab } from "siyuan";
@@ -32,10 +32,10 @@ export const thisPlugin = () => _plugin;
  */
 export const openCustomTab = (args: {
     tabId: string,
-    render: (container: Element) => void,
-    destroyCb: () => void,
     plugin?: Plugin
     title?: string,
+    render?: (container: Element) => void,
+    beforeDestroy?: () => void,
     icon?: string,
     position?: "right" | "bottom";
     keepCursor?: boolean; // 是否跳转到新 tab 上
@@ -43,15 +43,18 @@ export const openCustomTab = (args: {
     afterOpen?: () => void; // 打开后回调
 }) => {
     const plugin = args.plugin || _plugin;
-    plugin.addTab({
-        'type': args.tabId,
-        init(this: Custom) {
-            args.render(this.element);
-        },
-        beforeDestroy() {
-            args.destroyCb();
-        }
-    });
+    const opened = plugin.getOpenedTab();
+    if (opened[args.tabId]) {
+        plugin.addTab({
+            'type': args.tabId,
+            init(this: Custom) {
+                args.render?.(this.element);
+            },
+            beforeDestroy() {
+                args.beforeDestroy?.();
+            }
+        });
+    }
     openTab({
         app: plugin.app,
         custom: {
