@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2024-12-25 20:13:08
+ * @LastEditTime : 2024-12-25 21:57:55
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap } from "siyuan";
@@ -142,7 +142,7 @@ export const registerPlugin = (plugin: Plugin) => {
             };
 
             //如果 target 本来就有这个方法,就返回这个方法
-            if (target.hasOwnProperty(prop)) {
+            if (prop in target) { // 修改这里
                 return target[prop];
             }
 
