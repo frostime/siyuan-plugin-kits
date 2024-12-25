@@ -1,3 +1,5 @@
+import { IProtyle, Protyle } from 'siyuan';
+
 /*
  * Copyright (c) 2024 by frostime. All Rights Reserved.
  * @Author       : frostime
@@ -32,7 +34,7 @@ export type NotebookConf = {
     dailyNoteTemplatePath: string;
 }
 
-export type BlockType = 
+export type BlockType =
     | 'd'
     | 'p'
     | 'query_embed'
@@ -52,13 +54,13 @@ export type BlockType =
     | 'audio';
 
 
-export type BlockSubType = 
-    | 'h1' 
-    | 'h2' 
-    | 'h3' 
-    | 'h4' 
-    | 'h5' 
-    | 'h6' 
+export type BlockSubType =
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'h4'
+    | 'h5'
+    | 'h6'
     | 'o'
     | 'u'
     | 't';
@@ -97,4 +99,20 @@ export type doOperation = {
     parentID: BlockId | DocumentId;
     previousID: BlockId;
     retData: null;
+}
+
+export interface IPluginProtyleSlash {
+    filter: string[],
+    html: string,
+    id: string,
+    callback(protyle: Protyle): void,
+};
+
+export interface ISiyuanEventPaste {
+    protyle: IProtyle,
+    resolve: <T>(value: T | PromiseLike<T>) => void,
+    textHTML: string,
+    textPlain: string,
+    siyuanHTML: string,
+    files: FileList | DataTransferItemList;
 }

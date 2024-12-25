@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-10-09 21:09:16
  * @FilePath     : /rollup.config.js
- * @LastEditTime : 2024-12-18 22:15:51
+ * @LastEditTime : 2024-12-25 19:35:50
  * @Description  : 
  */
 import typescript from '@rollup/plugin-typescript';
@@ -11,7 +11,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import del from 'rollup-plugin-delete';
 
 export default {
-    input: 'src/index.ts',
+    input: ['src/index.ts', 'src/api.ts'],
     output: [
         {
             dir: 'dist',

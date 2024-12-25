@@ -86,11 +86,21 @@ export async function createDocWithMd(notebook: NotebookId, path: string, markdo
 
 export async function renameDoc(notebook: NotebookId, path: string, title: string): Promise<DocumentId> {
     let data = {
-        doc: notebook,
+        notebook: notebook,
         path: path,
         title: title
     };
     let url = '/api/filetree/renameDoc';
+    return request(url, data);
+}
+
+
+export async function renameDocByID(id: string, title: string) {
+    let data = {
+        id: id,
+        title: title
+    };
+    let url = '/api/filetree/renameDocByID';
     return request(url, data);
 }
 
@@ -105,6 +115,15 @@ export async function removeDoc(notebook: NotebookId, path: string) {
 }
 
 
+export async function removeDocByID(id: string) {
+    let data = {
+        id: id
+    };
+    let url = '/api/filetree/removeDocByID';
+    return request(url, data);
+}
+
+
 export async function moveDocs(fromPaths: string[], toNotebook: NotebookId, toPath: string) {
     let data = {
         fromPaths: fromPaths,
@@ -112,6 +131,15 @@ export async function moveDocs(fromPaths: string[], toNotebook: NotebookId, toPa
         toPath: toPath
     };
     let url = '/api/filetree/moveDocs';
+    return request(url, data);
+}
+
+export async function moveDocsByID(fromIDs: string[], toID: string) {
+    let data = {
+        fromIDs,
+        toID
+    };
+    let url = '/api/filetree/moveDocsByID';
     return request(url, data);
 }
 
@@ -141,6 +169,15 @@ export async function getIDsByHPath(notebook: NotebookId, path: string): Promise
         path: path
     };
     let url = '/api/filetree/getIDsByHPath';
+    return request(url, data);
+}
+
+
+export async function getPathByID(id: BlockId): Promise<string> {
+    let data = {
+        id: id
+    };
+    let url = '/api/filetree/getPathByID';
     return request(url, data);
 }
 
@@ -358,14 +395,22 @@ export const getFileBlob = async (path: string): Promise<Blob | null> => {
     return data;
 }
 
-export async function putFile(path: string, isDir: boolean, file: any) {
+export async function putFile(path: string, isDir: boolean, file: File | Blob) {
     let form = new FormData();
     form.append('path', path);
     form.append('isDir', isDir.toString());
     // Copyright (c) 2023, terwer.
     // https://github.com/terwer/siyuan-plugin-importer/blob/v1.4.1/src/api/kernel-api.ts
     form.append('modTime', Math.floor(Date.now() / 1000).toString());
-    form.append('file', file);
+    // form.append('file', file);
+    if (file instanceof File) {
+        form.append('file', file);
+    } else if (file instanceof Blob) {
+        form.append('file', file);
+    } else {
+        throw new Error('file must be File or Blob');
+    }
+
     let url = '/api/file/putFile';
     return request(url, form);
 }
@@ -380,7 +425,7 @@ export async function removeFile(path: string) {
 
 
 
-export async function readDir(path: string): Promise<IResReadDir> {
+export async function readDir(path: string): Promise<IResReadDir[]> {
     let data = {
         path: path
     }
