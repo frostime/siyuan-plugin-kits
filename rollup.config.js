@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-10-09 21:09:16
  * @FilePath     : /rollup.config.js
- * @LastEditTime : 2024-12-25 19:35:50
+ * @LastEditTime : 2024-12-25 23:04:00
  * @Description  : 
  */
 import typescript from '@rollup/plugin-typescript';
@@ -18,14 +18,16 @@ export default {
             format: 'es',
             preserveModules: true,
             entryFileNames: '[name].mjs',
-            exports: 'named'
+            exports: 'named',
+            chunkFileNames: '[name].mjs'
         },
         {
             dir: 'dist',
             format: 'cjs',
             preserveModules: true,
             entryFileNames: '[name].cjs',
-            exports: 'named'
+            exports: 'named',
+            chunkFileNames: '[name].cjs'
         }
     ],
     external: ['siyuan'],

@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2024-12-25 21:57:55
+ * @LastEditTime : 2024-12-25 23:00:21
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap } from "siyuan";
@@ -37,13 +37,20 @@ interface PluginExtends extends Plugin {
         isLeft?: boolean
     }): void;
 
-    registerEventbusHandler(event: keyof IEventBusMap, handler: (data: any) => void): void;
+    registerEventbusHandler<T extends keyof IEventBusMap>(
+        event: T,
+        handler: (e: CustomEvent<IEventBusMap[T]>) => void
+    ): void;
 
     registerOnClickBlockicon(callback: (details: IEventBusMap['click-blockicon'] & {
         blocks: Array<{
             type: string;
             id: string;
         }>
+    }) => void): void
+
+    registerOnClickDocIcon(callback: (details: IEventBusMap['click-editortitleicon'] & {
+        root_id: string;
     }) => void): void
 }
 
@@ -103,7 +110,10 @@ export const registerPlugin = (plugin: Plugin) => {
                     const topbar = plugin.addTopBar({ ...rest, callback: showMenu });
                 },
 
-                registerEventbusHandler(event: keyof IEventBusMap, handler: (data: any) => void) {
+                registerEventbusHandler<T extends keyof IEventBusMap>(
+                    event: T,
+                    handler: (e: CustomEvent<IEventBusMap[T]>) => void
+                ) {
                     const handlerWrapper = (data: any) => {
                         handler(data);
                     }
@@ -138,6 +148,25 @@ export const registerPlugin = (plugin: Plugin) => {
                     addUnloadCallback(() => {
                         plugin.eventBus.off("click-blockicon", onClickBlock);
                     });
+                },
+
+                registerOnClickDocIcon(callback: (details: IEventBusMap['click-editortitleicon'] & {
+                    root_id: string;
+                }) => void) {
+                    const onClick = async (e: CustomEvent<IEventBusMap['click-editortitleicon']>) => {
+                        let details = e.detail;
+                        let root_id = details.data.rootID;
+                        await callback({
+                            ...details,
+                            root_id
+                        });
+                    }
+
+                    target.eventBus.on('click-editortitleicon', onClick);
+                    addUnloadCallback(() => {
+                        target.eventBus.off('click-editortitleicon', onClick);
+                    });
+
                 }
             };
 

@@ -1,14 +1,14 @@
 {
   "name": "@frostime/siyuan-plugin-kits",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "type": "module",
   "description": "A utility for SiYuan plugin development",
   "repository": {
     "type": "git",
     "url": "https://github.com/frostime/siyuan-plugin-kits.git"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/types/index.d.ts",
   "exports": {
     ".": {
