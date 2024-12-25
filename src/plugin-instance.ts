@@ -3,11 +3,13 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2024-12-25 23:00:21
+ * @LastEditTime : 2024-12-26 00:28:53
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap } from "siyuan";
 import { IPluginProtyleSlash } from "./types";
+
+type Disposer = () => void;
 
 interface PluginExtends extends Plugin {
     registerUnloadCallback(callback: (plugin?: Plugin) => void): void
@@ -37,21 +39,29 @@ interface PluginExtends extends Plugin {
         isLeft?: boolean
     }): void;
 
+    /**
+     * Register eventbus handler for SiYuan
+     * The registered handler will be automatically disconnected when the plugin is unloaded
+     * The return is the dispose function, you can call it manually to disconnect the handler
+     * @param event 
+     * @param handler 
+     * @returns () => void
+     */
     registerEventbusHandler<T extends keyof IEventBusMap>(
         event: T,
         handler: (e: CustomEvent<IEventBusMap[T]>) => void
-    ): void;
+    ): Disposer;
 
     registerOnClickBlockicon(callback: (details: IEventBusMap['click-blockicon'] & {
         blocks: Array<{
             type: string;
             id: string;
         }>
-    }) => void): void
+    }) => void): Disposer
 
     registerOnClickDocIcon(callback: (details: IEventBusMap['click-editortitleicon'] & {
         root_id: string;
-    }) => void): void
+    }) => void): Disposer
 }
 
 let _plugin: PluginExtends;
@@ -113,14 +123,19 @@ export const registerPlugin = (plugin: Plugin) => {
                 registerEventbusHandler<T extends keyof IEventBusMap>(
                     event: T,
                     handler: (e: CustomEvent<IEventBusMap[T]>) => void
-                ) {
+                ): Disposer {
                     const handlerWrapper = (data: any) => {
                         handler(data);
                     }
                     plugin.eventBus.on(event, handlerWrapper);
-                    addUnloadCallback(() => {
+                    let disposed = false;
+                    const dispose = () => {
+                        if (disposed) return;
                         plugin.eventBus.off(event, handlerWrapper);
-                    });
+                        disposed = true;
+                    }
+                    addUnloadCallback(dispose);
+                    return dispose;
                 },
 
                 registerOnClickBlockicon(callback: (details: IEventBusMap['click-blockicon'] & {
@@ -128,7 +143,7 @@ export const registerPlugin = (plugin: Plugin) => {
                         type: string;
                         id: string;
                     }>
-                }) => void) {
+                }) => void): Disposer {
 
                     async function onClickBlock({ detail }: CustomEvent<IEventBusMap['click-blockicon']>) {
                         let blocksDetails = detail.blockElements.map((blockElement) => {
@@ -145,14 +160,19 @@ export const registerPlugin = (plugin: Plugin) => {
                     }
 
                     plugin.eventBus.on("click-blockicon", onClickBlock);
-                    addUnloadCallback(() => {
+                    let disposed = false;
+                    const dispose = () => {
+                        if (disposed) return;
                         plugin.eventBus.off("click-blockicon", onClickBlock);
-                    });
+                        disposed = true;
+                    }
+                    addUnloadCallback(dispose);
+                    return dispose;
                 },
 
                 registerOnClickDocIcon(callback: (details: IEventBusMap['click-editortitleicon'] & {
                     root_id: string;
-                }) => void) {
+                }) => void): Disposer {
                     const onClick = async (e: CustomEvent<IEventBusMap['click-editortitleicon']>) => {
                         let details = e.detail;
                         let root_id = details.data.rootID;
@@ -163,10 +183,14 @@ export const registerPlugin = (plugin: Plugin) => {
                     }
 
                     target.eventBus.on('click-editortitleicon', onClick);
-                    addUnloadCallback(() => {
+                    let disposed = false;
+                    const dispose = () => {
+                        if (disposed) return;
                         target.eventBus.off('click-editortitleicon', onClick);
-                    });
-
+                        disposed = true;
+                    }
+                    addUnloadCallback(dispose);
+                    return dispose;
                 }
             };
 
