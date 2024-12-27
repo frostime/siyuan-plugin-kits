@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-21 14:58:47
  * @FilePath     : /src/lute.ts
- * @LastEditTime : 2024-12-26 18:18:15
+ * @LastEditTime : 2024-12-27 17:44:28
  * @Description  : 
  */
 import { Lute } from "siyuan";
@@ -17,7 +17,7 @@ export const getLute = (options?: {
     lazyLoadImage?: string;
 }) => {
     if (lute) return lute;
-    lute = Lute.New(); 
+    lute = window.Lute.New();
     lute.SetSpellcheck(window.siyuan.config.editor.spellcheck);
     lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
     lute.SetFileAnnotationRef(true);

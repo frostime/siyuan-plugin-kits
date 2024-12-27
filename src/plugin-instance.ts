@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2024-12-26 01:00:18
+ * @LastEditTime : 2024-12-27 16:37:05
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap } from "siyuan";
@@ -12,7 +12,7 @@ import { getFileBlob, putFile, removeFile } from "./api";
 
 type Disposer = () => void;
 
-interface PluginExtends extends Plugin {
+export interface PluginExtends extends Plugin {
     registerUnloadCallback(callback: (plugin?: Plugin) => void): void
 
     /**
@@ -33,12 +33,13 @@ interface PluginExtends extends Plugin {
     /**
      * 快速注册一个顶部菜单
      * @param args 
+     * @returns plugin.addTopBar 返回的 HTMLElement
      */
     registerTopbarMenu(args: Omit<Parameters<Plugin['addTopBar']>[0], 'callback'> & {
         beforeShow: (menu: Menu, event: MouseEvent) => void,
         menus: IMenu[] | (() => IMenu[]),
         isLeft?: boolean
-    }): void;
+    }): HTMLElement;
 
     /**
      * Register eventbus handler for SiYuan
@@ -134,13 +135,14 @@ export const registerPlugin = (plugin: Plugin) => {
                         args.beforeShow && args.beforeShow(menu, event);
                         const rect = topbar.getBoundingClientRect();
                         menu.open({
-                            x: rect.left,
+                            x: args.isLeft ? rect.right : rect.left,
                             y: rect.bottom,
                             isLeft: args.isLeft
                         });
                     }
 
                     const topbar = plugin.addTopBar({ ...rest, callback: showMenu });
+                    return topbar;
                 },
 
                 registerEventbusHandler<T extends keyof IEventBusMap>(
