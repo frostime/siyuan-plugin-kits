@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-10-09 21:09:16
  * @FilePath     : /rollup.config.js
- * @LastEditTime : 2024-12-25 23:04:00
+ * @LastEditTime : 2024-12-27 16:15:38
  * @Description  : 
  */
 import typescript from '@rollup/plugin-typescript';
@@ -11,23 +11,24 @@ import resolve from '@rollup/plugin-node-resolve';
 import del from 'rollup-plugin-delete';
 
 export default {
-    input: ['src/index.ts', 'src/api.ts'],
+    input: {
+        'index': 'src/index.ts',
+        'api': 'src/api.ts'
+    },
     output: [
         {
             dir: 'dist',
             format: 'es',
             preserveModules: true,
             entryFileNames: '[name].mjs',
-            exports: 'named',
-            chunkFileNames: '[name].mjs'
+            exports: 'named'
         },
         {
             dir: 'dist',
             format: 'cjs',
             preserveModules: true,
             entryFileNames: '[name].cjs',
-            exports: 'named',
-            chunkFileNames: '[name].cjs'
+            exports: 'named'
         }
     ],
     external: ['siyuan'],
