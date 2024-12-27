@@ -3,11 +3,18 @@
  * @Author       : frostime
  * @Date         : 2024-06-08 20:36:30
  * @FilePath     : /src/const.ts
- * @LastEditTime : 2024-12-19 13:57:01
+ * @LastEditTime : 2024-12-27 15:59:23
  * @Description  : 
  */
 
 import { BlockSubType, BlockType } from "./types";
+
+export const SIAYUN_ATTR = {
+    READONLY: 'custom-sy-readonly',
+    FULLWIDTH: 'custom-sy-fullwidth',
+    AV_VIEW: 'custom-sy-av-view',
+    HIDDEN: 'custom-hidden'  //only for document block
+};
 
 
 const BlockTypeName_ZH: Record<BlockType | BlockSubType, string> = {

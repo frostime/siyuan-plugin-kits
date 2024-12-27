@@ -3,11 +3,12 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2024-12-26 00:28:53
+ * @LastEditTime : 2024-12-26 01:00:18
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap } from "siyuan";
 import { IPluginProtyleSlash } from "./types";
+import { getFileBlob, putFile, removeFile } from "./api";
 
 type Disposer = () => void;
 
@@ -62,6 +63,28 @@ interface PluginExtends extends Plugin {
     registerOnClickDocIcon(callback: (details: IEventBusMap['click-editortitleicon'] & {
         root_id: string;
     }) => void): Disposer
+
+    /**
+     * Load a blob from storage
+     * @param storageName Storage name
+     * @param prefix Storage path prefix
+     */
+    loadBlob(storageName: string, prefix?: string): Promise<Blob | null>;
+
+    /**
+     * Save data as blob to storage
+     * @param storageName Storage name
+     * @param data Data to save (Blob, File, Object, or string)
+     * @param prefix Storage path prefix
+     */
+    saveBlob(storageName: string, data: Blob | File | Object | string, prefix?: string): Promise<Blob | null>;
+
+    /**
+     * Remove a blob from storage
+     * @param storageName Storage name
+     * @param prefix Storage path prefix
+     */
+    removeBlob(storageName: string, prefix?: string): Promise<any>;
 }
 
 let _plugin: PluginExtends;
@@ -191,7 +214,39 @@ export const registerPlugin = (plugin: Plugin) => {
                     }
                     addUnloadCallback(dispose);
                     return dispose;
-                }
+                },
+
+                loadBlob(storageName: string, prefix: string = '/data/storage/petal/{{plugin}}'): Promise<Blob | null> {
+                    prefix = prefix.replace('{{plugin}}', target.name);
+                    return getFileBlob(`${prefix}/${storageName}`);
+                },
+
+                saveBlob(storageName: string, data: Blob | File | Object | string, prefix: string = '/data/storage/petal/{{plugin}}'): Promise<Blob | null> {
+                    let dataBlob: Blob | File;
+
+                    if (data instanceof Blob) {
+                        dataBlob = data;
+                    } else if (data instanceof File) {
+                        dataBlob = data;
+                    } else if (typeof data === 'object') {
+                        dataBlob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                    } else if (typeof data === 'string') {
+                        dataBlob = new Blob([data], { type: 'text/plain' });
+                    } else {
+                        throw new Error('Unsupported data type');
+                    }
+
+                    prefix = prefix.replace('{{plugin}}', target.name);
+                    const pathString = `${prefix}/${storageName}`;
+                    const file = new File([dataBlob], pathString.split("/").pop());
+
+                    return putFile(pathString, false, file);
+                },
+
+                removeBlob(storageName: string, prefix: string = '/data/storage/petal/{{plugin}}'): Promise<any> {
+                    prefix = prefix.replace('{{plugin}}', target.name);
+                    return removeFile(`${prefix}/${storageName}`);
+                },
             };
 
             //如果 target 本来就有这个方法,就返回这个方法
@@ -247,6 +302,7 @@ export const openCustomTab = (args: {
     render?: (container: Element) => void,
     beforeDestroy?: () => void,
     icon?: string,
+    tabData?: any,
     position?: "right" | "bottom";
     keepCursor?: boolean; // 是否跳转到新 tab 上
     removeCurrentTab?: boolean; // 在当前页签打开时需移除原有页签
@@ -265,16 +321,18 @@ export const openCustomTab = (args: {
             }
         });
     }
-    openTab({
+    let tab = openTab({
         app: plugin.app,
         custom: {
             title: args.title || 'Custom Tab',
             icon: args.icon || 'iconEmoji',
             id: plugin.name + args.tabId,
+            data: args.tabData
         },
         position: args.position,
         keepCursor: args.keepCursor,
         removeCurrentTab: args.removeCurrentTab,
         afterOpen: args.afterOpen
     });
+    return tab;
 }
