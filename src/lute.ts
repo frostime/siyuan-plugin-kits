@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-21 14:58:47
  * @FilePath     : /src/lute.ts
- * @LastEditTime : 2024-12-27 17:44:28
+ * @LastEditTime : 2024-12-27 18:15:28
  * @Description  : 
  */
 import { Lute } from "siyuan";
@@ -11,13 +11,15 @@ import { Lute } from "siyuan";
 let lute: Lute;
 
 export const getLute = (options?: {
-    emojis: { [key: string]: string };
-    emojiSite: string;
-    headingAnchor: boolean;
+    emojis?: { [key: string]: string };
+    emojiSite?: string;
+    headingAnchor?: boolean;
     lazyLoadImage?: string;
 }) => {
     if (lute) return lute;
     lute = window.Lute.New();
+    options = options ?? {};
+
     lute.SetSpellcheck(window.siyuan.config.editor.spellcheck);
     lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
     lute.SetFileAnnotationRef(true);
