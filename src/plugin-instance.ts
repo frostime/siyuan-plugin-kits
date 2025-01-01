@@ -3,10 +3,10 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2024-12-27 16:37:05
+ * @LastEditTime : 2025-01-01 15:47:14
  * @Description  : 
  */
-import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap } from "siyuan";
+import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap, Protyle } from "siyuan";
 import { IPluginProtyleSlash } from "./types";
 import { getFileBlob, putFile, removeFile } from "./api";
 
@@ -51,7 +51,7 @@ export interface PluginExtends extends Plugin {
      */
     registerEventbusHandler<T extends keyof IEventBusMap>(
         event: T,
-        handler: (e: CustomEvent<IEventBusMap[T]>) => void
+        handler: (detail: IEventBusMap[T]) => void
     ): Disposer;
 
     registerOnClickBlockicon(callback: (details: IEventBusMap['click-blockicon'] & {
@@ -64,6 +64,8 @@ export interface PluginExtends extends Plugin {
     registerOnClickDocIcon(callback: (details: IEventBusMap['click-editortitleicon'] & {
         root_id: string;
     }) => void): Disposer
+
+    registerOnDestroyProtyle(callback: (details: IEventBusMap['destroy-protyle']) => void): Disposer
 
     /**
      * Load a blob from storage
@@ -147,10 +149,10 @@ export const registerPlugin = (plugin: Plugin) => {
 
                 registerEventbusHandler<T extends keyof IEventBusMap>(
                     event: T,
-                    handler: (e: CustomEvent<IEventBusMap[T]>) => void
+                    handler: (detail: IEventBusMap[T]) => void
                 ): Disposer {
-                    const handlerWrapper = (data: any) => {
-                        handler(data);
+                    const handlerWrapper = (e: CustomEvent<IEventBusMap[T]>) => {
+                        handler(e.detail);
                     }
                     plugin.eventBus.on(event, handlerWrapper);
                     let disposed = false;
@@ -216,6 +218,22 @@ export const registerPlugin = (plugin: Plugin) => {
                     }
                     addUnloadCallback(dispose);
                     return dispose;
+                },
+
+                registerOnLoadedProtyleStatic(callback: (details: IEventBusMap['loaded-protyle-static']) => void): Disposer {
+                    return _plugin.registerEventbusHandler('loaded-protyle-static', callback);
+                },
+
+                registerOnLoadedProtyleDynamic(callback: (details: IEventBusMap['loaded-protyle-dynamic']) => void): Disposer {
+                    return _plugin.registerEventbusHandler('loaded-protyle-dynamic', callback);
+                },
+
+                registerOnSwitchProtyle(callback: (details: IEventBusMap['switch-protyle']) => void): Disposer {
+                    return _plugin.registerEventbusHandler('switch-protyle', callback);
+                },
+
+                registerOnDestroyProtyle(callback: (details: IEventBusMap['destroy-protyle']) => void): Disposer {
+                    return _plugin.registerEventbusHandler('destroy-protyle', callback);
                 },
 
                 loadBlob(storageName: string, prefix: string = '/data/storage/petal/{{plugin}}'): Promise<Blob | null> {
@@ -337,4 +355,9 @@ export const openCustomTab = (args: {
         afterOpen: args.afterOpen
     });
     return tab;
+}
+
+
+export const clearSlash = (protyle: Protyle) => {
+    protyle.insert(window.Lute.Caret, false, false);
 }

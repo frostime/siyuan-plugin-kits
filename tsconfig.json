@@ -10,7 +10,7 @@
         "outDir": "./dist",
         "strict": false,
         "esModuleInterop": true,
-        "moduleResolution": "node",
+        "moduleResolution": "node",  //重要
         // "jsx": "preserve",
         // "jsxImportSource": "solid-js"
         "paths": {
