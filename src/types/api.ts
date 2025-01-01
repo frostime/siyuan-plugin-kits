@@ -1,5 +1,10 @@
 import { Notebook, NotebookConf, BlockType, BlockSubType, doOperation, BlockId } from "./index";
 
+export interface IDocTreeNode {
+    id: BlockId;
+    children?: IDocTreeNode[];
+}
+
 export interface IResGetNotebookConf {
     box: string;
     conf: NotebookConf;

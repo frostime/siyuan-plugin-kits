@@ -8,7 +8,7 @@
 
 import { fetchPost, fetchSyncPost, IWebSocketData } from "siyuan";
 
-import { NotebookId, Notebook, NotebookConf, DocumentId, BlockId, PreviousID, ParentID, Block, IResGetTemplates, IResReadDir } from "./types";
+import { NotebookId, Notebook, NotebookConf, DocumentId, BlockId, PreviousID, ParentID, Block, IResGetTemplates, IResReadDir, IDocTreeNode } from "./types";
 import { IResGetNotebookConf, IReslsNotebooks, IResUpload, IResdoOperations, IResGetBlockKramdown, IResGetChildBlock, IResExportMdContent, IResExportResources, IResForwardProxy, IResBootProgress } from "./types";
 
 
@@ -73,6 +73,23 @@ export async function setNotebookConf(notebook: NotebookId, conf: NotebookConf):
 
 
 // **************************************** File Tree ****************************************
+
+export async function listDocTree(notebook: NotebookId, path: string): Promise<IDocTreeNode[]> {
+    let data = {
+        notebook: notebook,
+        path: path
+    }
+    let url = '/api/filetree/listDocTree';
+    let resData = await request(url, data);
+    return resData?.tree;
+}
+
+export async function listDocsByPath(notebook: NotebookId, path: string) {
+    let url = '/api/filetree/listDocsByPath'
+    let payload = { notebook: notebook, path: path };
+    return request(url, payload);
+}
+
 export async function createDocWithMd(notebook: NotebookId, path: string, markdown: string): Promise<DocumentId> {
     let data = {
         notebook: notebook,

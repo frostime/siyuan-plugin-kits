@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-10-09 21:09:34
  * @FilePath     : /src/index.ts
- * @LastEditTime : 2024-12-18 22:50:38
+ * @LastEditTime : 2025-01-01 17:11:40
  * @Description  : 
  */
 
@@ -23,3 +23,7 @@ export * from "./siyuan-instance";
 
 export * from "./style";
 export * from "./time";
+
+export * from "./block";
+export * from "./documents";
+export * from "./search";
