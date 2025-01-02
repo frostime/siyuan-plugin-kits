@@ -3,11 +3,11 @@
  * @Author       : frostime
  * @Date         : 2025-01-01 15:22:48
  * @FilePath     : /src/documents.ts
- * @LastEditTime : 2025-01-01 17:13:37
+ * @LastEditTime : 2025-01-02 11:55:44
  * @Description  : 
  */
 import { createDocWithMd, removeDocByID, renameDocByID, setBlockAttrs, sql, updateBlock } from "./api";
-import { DocumentId, NotebookId } from "./types";
+import { BlockId, DocumentId, NotebookId } from "./types";
 
 export function getActiveDoc() {
     let tab = document.querySelector("div.layout__wnd--active ul.layout-tab-bar>li.item--focus");
@@ -31,6 +31,15 @@ export function getActiveDoc() {
  * Use a document that with specific attribute
  * This is useful when you want to use a specific document for your special purpose
  * @param options 
+ * @param options.name - The name of the attribute
+ * @param options.value - The value of the attribute
+ * @param options.cond - The condition of the attribute
+ * @param options.createOptions - The options for creating the document
+ * @param options.createOptions.createCallback - The callback for creating the document, if this is provided, the document will be created by this callback, ignore other options
+ * @param options.createOptions.notebook - The notebook id for creating the document; applied when createCallback is not provided
+ * @param options.createOptions.dir - The directory for creating the document; applied when createCallback is not provided
+ * @param options.createOptions.title - The title for creating the document; applied when createCallback is not provided
+ * @param options.createOptions.content - The content for creating the document; applied when createCallback is not provided
  * @returns 
  */
 export const useDocumentWithAttr = async (options: {
@@ -38,6 +47,7 @@ export const useDocumentWithAttr = async (options: {
     value: string;
     cond?: string;
     createOptions?: {
+        createCallback?: () => Promise<BlockId>;
         notebook?: NotebookId;
         dir?: string;
         title?: string;
@@ -70,32 +80,40 @@ export const useDocumentWithAttr = async (options: {
 
     if (!docs || docs.length === 0) {
         isNew = true;
-        let createOptions = {
-            notebook: null,
-            dir: '/',
-            title: 'New Doc',
-            content: '',
-        };
-        if (options.createOptions) {
-            createOptions = {
-                ...createOptions,
-                ...options.createOptions,
+        const createFun = async () => {
+            let createOptions = {
+                notebook: null,
+                dir: '/',
+                title: 'New Doc',
+                content: '',
+            };
+            if (options.createOptions) {
+                createOptions = {
+                    ...createOptions,
+                    ...options.createOptions,
+                }
             }
-        }
-        if (!createOptions.notebook) {
-            const notebooks = window.siyuan.notebooks.filter(n => n.closed === false);
-            if (notebooks.length === 0) {
-                throw new Error('No opened notebook found');
+            if (!createOptions.notebook) {
+                const notebooks = window.siyuan.notebooks.filter(n => n.closed === false);
+                if (notebooks.length === 0) {
+                    throw new Error('No opened notebook found');
+                }
+                createOptions.notebook = notebooks[0].id;
             }
-            createOptions.notebook = notebooks[0].id;
+            if (!createOptions.dir.endsWith('/')) {
+                createOptions.dir = createOptions.dir + '/';
+            }
+            if (createOptions.title.startsWith('/')) {
+                createOptions.title = createOptions.title.slice(1);
+            }
+            docId = await createDocWithMd(createOptions.notebook, `${createOptions.dir}${createOptions.title}`, createOptions.content);
+            return docId;
         }
-        if (!createOptions.dir.endsWith('/')) {
-            createOptions.dir = createOptions.dir + '/';
+        if (options.createOptions?.createCallback) {
+            docId = await options.createOptions.createCallback();
+        } else {
+            docId = await createFun();
         }
-        if (createOptions.title.startsWith('/')) {
-            createOptions.title = createOptions.title.slice(1);
-        }
-        docId = await createDocWithMd(createOptions.notebook, `${createOptions.dir}${createOptions.title}`, createOptions.content);
         await setBlockAttrs(docId, {
             [options.name]: options.value,
         });

@@ -44,6 +44,30 @@ export const findPlugin = (name: string): Plugin => {
     return plugin;
 }
 
+const User_Helps: Set<string> = new Set(["思源笔记用户指南", "SiYuan User Guide"]);
+
+export const lsOpenedNotebooks = (options: {
+    opened: boolean;
+    userHelp: boolean;
+} = {
+    opened: true,
+    userHelp: false,
+}) => {
+    let all_notebooks = window.siyuan.notebooks as Notebook[];
+    let notebooks = all_notebooks.filter(
+        notebook => {
+            if (options.opened === true && notebook.closed) {
+                return false;
+            }
+            if (options.userHelp === false && User_Helps.has(notebook.name)) {
+                return false;
+            }
+            return true;
+        }
+    );
+    return notebooks;
+}
+
 
 export const getNotebook = (boxId: string): Notebook => {
     let notebooks: Notebook[] = window.siyuan.notebooks;

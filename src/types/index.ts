@@ -1,11 +1,11 @@
-import { IProtyle, Protyle } from 'siyuan';
+import { IProtyle, Protyle, ISiyuan } from 'siyuan';
 
 /*
  * Copyright (c) 2024 by frostime. All Rights Reserved.
  * @Author       : frostime
  * @Date         : 2023-08-15 10:28:10
  * @FilePath     : /src/types/index.ts
- * @LastEditTime : 2024-12-18 22:43:35
+ * @LastEditTime : 2025-01-02 12:17:19
  * @Description  : Frequently used data structures in SiYuan
  */
 export * from './api';
@@ -18,12 +18,16 @@ export type PreviousID = BlockId;
 export type ParentID = BlockId | DocumentId;
 
 export type Notebook = {
-    id: NotebookId;
-    name: string;
-    icon: string;
-    sort: number;
-    closed: boolean;
-}
+    name: string
+    id: string
+    closed: boolean
+    icon: string
+    sort: number
+    dueFlashcardCount?: string;
+    newFlashcardCount?: string;
+    flashcardCount?: string;
+    sortMode: number
+};
 
 export type NotebookConf = {
     name: string;
