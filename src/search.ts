@@ -28,14 +28,17 @@ export const getMarkdown = async (id: BlockId): Promise<string> => {
     }
 }
 
-export const id2block = async (ids: BlockId | BlockId[]): Promise<Block[]> => {
+
+export const searchIDs = async (ids: BlockId | BlockId[]): Promise<Block[]> => {
     let idList = Array.isArray(ids) ? ids.map((id) => `"${id}"`) : [`"${ids}"`];
     let sqlCode = `select * from blocks where id in (${idList.join(",")})`;
     let data = await sql(sqlCode);
     return data;
 }
 
-export const childDocuments = async (documentId: BlockId): Promise<Block[]> => {
+export const id2block = searchIDs;
+
+export const searchChildDocs = async (documentId: BlockId): Promise<Block[]> => {
     let doc: Block = await getBlockByID(documentId);
     if (!doc) {
         return [];
@@ -49,7 +52,7 @@ export const childDocuments = async (documentId: BlockId): Promise<Block[]> => {
     return childs;
 }
 
-export const backlinks = async (id: BlockId, limit: number = 64): Promise<Block[]> => {
+export const searchBacklinks = async (id: BlockId, limit: number = 64): Promise<Block[]> => {
     return sql(`
     select * from blocks where id in (
         select block_id from refs where def_block_id = '${id}'
@@ -57,7 +60,7 @@ export const backlinks = async (id: BlockId, limit: number = 64): Promise<Block[
     `);
 }
 
-export const attr = async (name: string, val?: string, valMatch: '=' | 'like' = '=', limit?: number): Promise<Block[]> => {
+export const searchAttr = async (name: string, val?: string, valMatch: '=' | 'like' = '=', limit?: number): Promise<Block[]> => {
     return sql(`
     SELECT B.*
     FROM blocks AS B

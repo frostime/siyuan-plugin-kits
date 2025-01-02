@@ -1,6 +1,6 @@
 {
   "name": "@frostime/siyuan-plugin-kits",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "type": "module",
   "description": "A utility for SiYuan plugin development",
   "repository": {
