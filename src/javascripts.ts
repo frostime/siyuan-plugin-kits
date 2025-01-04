@@ -8,8 +8,18 @@
  */
 
 import { getFileBlob, putFile } from "./api";
+import { thisPlugin } from "./plugin-instance";
 
-export const createJavascriptFile = async (code: string, name: string, prefix: string = '/data/public') => {
+export const createJavascriptFile = async (code: string, name: string, prefix: string = '/data/storage/petal/{{plugin}}') => {
+    if (prefix.includes('{{plugin}}')) {
+        const plugin = thisPlugin();
+        if (plugin) {
+            prefix = prefix.replaceAll('{{plugin}}', plugin.name);
+        } else {
+            console.error('Can not get plugin instance, so failed to parse {{plugin}} in prefix!');
+        }
+    }
+
     const file = new File([code], name, { type: 'text/javascript' });
     if (prefix.endsWith('/')) {
         prefix = prefix.slice(0, -1);
@@ -20,7 +30,19 @@ export const createJavascriptFile = async (code: string, name: string, prefix: s
 }
 
 
-export const importJavascriptFile = async (path: string) => {
+export const importJavascriptFile = async (name: string, prefix: string = '/data/storage/petal/{{plugin}}') => {
+    if (prefix.includes('{{plugin}}')) {
+        const plugin = thisPlugin();
+        if (plugin) {
+            prefix = prefix.replaceAll('{{plugin}}', plugin.name);
+        } else {
+            console.error('Can not get plugin instance, so failed to parse {{plugin}} in prefix!');
+        }
+    }
+    if (prefix.endsWith('/')) {
+        prefix = prefix.slice(0, -1);
+    }
+    const path = `${prefix}/${name}`;
     const blob = await getFileBlob(path);
     if (!blob) {
         return null;
