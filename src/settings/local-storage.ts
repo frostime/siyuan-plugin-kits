@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-07-13 21:19:23
  * @FilePath     : /src/settings/local-storage.ts
- * @LastEditTime : 2025-01-04 20:04:09
+ * @LastEditTime : 2025-01-06 01:03:41
  * @Description  : 
  */
 import { Plugin } from "siyuan";
@@ -44,22 +44,25 @@ export const useLocalDeviceStorage = async (plugin: Plugin, filePrefix: string =
     }
 }
 
+export const useDevicewiseConfigs = useLocalDeviceStorage;
 
 export const useDevicewiseValue = <T>(defaultValue: T) => {
     const device = window.siyuan.config.system;
-    let storage: Record<string, T> = {};
-    storage[device.id] = defaultValue;
+    let _storage: Record<string, T> = {};
+    _storage[device.id] = defaultValue;
 
     return {
-        storage,
+        get storage() {
+            return _storage;
+        },
         init: (values: Record<string, T>) => {
-            storage = deepMerge(storage, values);
+            _storage = deepMerge(_storage, values);
         },
         get: () => {
-            return storage[device.id];
+            return _storage[device.id];
         },
         set: (value: T) => {
-            storage[device.id] = value;
+            _storage[device.id] = value;
         }
     }
 }
