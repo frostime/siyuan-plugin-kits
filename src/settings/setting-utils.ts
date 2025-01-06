@@ -3,20 +3,21 @@
  * @Author       : frostime
  * @Date         : 2023-12-17 18:28:19
  * @FilePath     : /src/settings/setting-utils.ts
- * @LastEditTime : 2024-12-18 21:24:47
+ * @LastEditTime : 2025-01-06 20:34:26
  * @Description  : 
  */
 
 import { Plugin, Setting } from 'siyuan';
-import { TSettingItemType, ISettingUtilsItem } from './types';
-import { useLocalDeviceStorage } from './local-storage';
+import { TSettingItemType, ISettingUtilsItem, ISettingItemAdapter } from './types';
+import { useDevicewiseValue } from './local-storage';
+import { createSettingItemAdapter } from './setting-adpater';
 
 /**
  * The default function to get the value of the element
  * @param type 
  * @returns 
  */
-const createDefaultGetter = (type: TSettingItemType) => {
+const createDefaultElementGetter = (type: TSettingItemType) => {
     let getter: (ele: HTMLElement) => any;
     switch (type) {
         case 'checkbox':
@@ -50,7 +51,7 @@ const createDefaultGetter = (type: TSettingItemType) => {
  * @param type 
  * @returns 
  */
-const createDefaultSetter = (type: TSettingItemType) => {
+const createDefaultElementSetter = (type: TSettingItemType) => {
     let setter: (ele: HTMLElement, value: any) => unknown;
     switch (type) {
         case 'checkbox':
@@ -68,7 +69,7 @@ const createDefaultSetter = (type: TSettingItemType) => {
             };
             break;
         default:
-            setter = () => {};
+            setter = () => { };
             break;
     }
     return setter;
@@ -76,16 +77,62 @@ const createDefaultSetter = (type: TSettingItemType) => {
 }
 
 
+// const adaptSettingItemStorage = <T>(item: ISettingUtilsItem<T>): ISettintItemStorage<T> => {
+//     let storage: ISettingItemStorage<T>;
+//     if (item.devicewise !== true) {
+//         // 普通的 setting item
+//         let _storage = item.value;
+//         storage = {
+//             get storage() { return _storage },
+//             set storage(val: T) {
+//                 _storage = val;
+//             },
+//             get: () => _storage,
+//             set: (val: T) => {
+//                 _storage = val;
+//             },
+//             init: (storage: T | Record<string, T>) => {
+//                 // item.value = storage;
+//                 if (storage !== undefined && storage !== null) {
+//                     _storage = storage;
+//                 }
+//             },
+//         }
+//     } else {
+//         storage = useDevicewiseValue(item.value);
+//     }
+//     let adapter: ISettintItemStorage<T> = {
+//         ...storage,
+//         key: item.key,
+//         type: item.type,
+//         getEleVal: item.getEleVal,
+//         setEleVal: item.setEleVal
+//     };
+
+//     if (adapter.getEleVal === undefined) {
+//         adapter.getEleVal = createDefaultElementGetter(adapter.type);
+//     }
+//     if (adapter.setEleVal === undefined) {
+//         adapter.setEleVal = createDefaultElementSetter(adapter.type);
+//     }
+
+//     return adapter;
+// }
+type ISettingUtilsItemStorage = ISettingItemAdapter<any> & {
+    type: TSettingItemType;
+    // key: string;
+    getEleVal: (ele: HTMLElement) => any;
+    setEleVal: (ele: HTMLElement, val: any) => void;
+}
+
 export class SettingUtils {
     plugin: Plugin;
     name: string;
     file: string;
 
-    settings: Map<string, ISettingUtilsItem> = new Map();
-    elements: Map<string, HTMLElement> = new Map();
 
-    private deviceStorage: Awaited<ReturnType<typeof useLocalDeviceStorage>> | null = null;
-    private localOnlyItems: Set<string> = new Set();
+    settings: Map<string, ISettingUtilsItemStorage> = new Map();
+    elements: Map<string, HTMLElement> = new Map();
 
     constructor(args: {
         plugin: Plugin,
@@ -121,17 +168,14 @@ export class SettingUtils {
     }
 
     async load() {
-        if (this.localOnlyItems.size > 0 && this.deviceStorage === null) {
-            this.deviceStorage = await useLocalDeviceStorage(this.plugin);
-        }
-
         let data = await this.plugin.loadData(this.file);
         console.debug('Load config:', data);
         if (data) {
-            for (let [key, item] of this.settings) {
-                item.value = data?.[key] ?? item.value;
-                if (this.localOnlyItems.has(key)) {
-                    item.value = this.deviceStorage?.get(key) ?? item.value;
+            for (let [key, storage] of this.settings) {
+                // item.value = data?.[key] ?? item.value;
+                let dataValue = data?.[key];
+                if (dataValue !== undefined) {
+                    storage.init(data?.[key]);
                 }
             }
         }
@@ -141,14 +185,7 @@ export class SettingUtils {
 
     async save(data?: any) {
         data = data ?? this.dump();
-        if (this.localOnlyItems.size > 0 && this.deviceStorage) {
-            for (let key of this.localOnlyItems) {
-                this.deviceStorage.set(key, data[key], false);
-            }
-            await this.deviceStorage.save();
-        }
-
-        await this.plugin.saveData(this.file, data);
+        await this.plugin.saveData(this.file, this.dump());
         console.debug('Save config:', data);
         return data;
     }
@@ -159,7 +196,7 @@ export class SettingUtils {
      * @returns setting item value
      */
     get(key: string) {
-        return this.settings.get(key)?.value;
+        return this.settings.get(key)?.get();
     }
 
     /**
@@ -169,9 +206,10 @@ export class SettingUtils {
      * @param value value
      */
     set(key: string, value: any) {
-        let item = this.settings.get(key);
-        if (item) {
-            item.value = value;
+        let storage = this.settings.get(key);
+        if (storage) {
+            // item.value = value;
+            storage.set(value);
             this.updateElementFromValue(key);
         }
     }
@@ -183,9 +221,10 @@ export class SettingUtils {
      * @param value value
      */
     async setAndSave(key: string, value: any) {
-        let item = this.settings.get(key);
-        if (item) {
-            item.value = value;
+        let storage = this.settings.get(key);
+        if (storage) {
+            // item.value = value;
+            storage.set(value);
             this.updateElementFromValue(key);
             await this.save();
         }
@@ -250,15 +289,33 @@ export class SettingUtils {
      */
     dump(): Object {
         let data: any = {};
-        for (let [key, item] of this.settings) {
-            if (item.type === 'button') continue;
-            data[key] = item.value;
+        for (let [key, storage] of this.settings) {
+            if (storage.type === 'button') continue;
+            data[key] = storage.storage;
         }
         return data;
     }
 
-    addItem(item: ISettingUtilsItem, style?: Record<string, any>) {
-        this.settings.set(item.key, item);
+    private createSettingItemStorage<T>(item: ISettingUtilsItem<T>) {
+        let _storage = createSettingItemAdapter(item);
+        let adapter: ISettingUtilsItemStorage = {
+            ..._storage,
+            type: item.type,
+            getEleVal: item.getEleVal,
+            setEleVal: item.setEleVal
+        };
+
+        if (adapter.getEleVal === undefined) {
+            adapter.getEleVal = createDefaultElementGetter(adapter.type);
+        }
+        if (adapter.setEleVal === undefined) {
+            adapter.setEleVal = createDefaultElementSetter(adapter.type);
+        }
+        return adapter;
+    }
+
+    addItem<T>(item: ISettingUtilsItem<T>, style?: Record<string, any>) {
+        // this.settings.set(item.key, item);
         const IsCustom = item.type === 'custom';
         let error = IsCustom && (item.createElement === undefined || item.getEleVal === undefined || item.setEleVal === undefined);
         if (error) {
@@ -266,12 +323,8 @@ export class SettingUtils {
             return;
         }
 
-        if (item.getEleVal === undefined) {
-            item.getEleVal = createDefaultGetter(item.type);
-        }
-        if (item.setEleVal === undefined) {
-            item.setEleVal = createDefaultSetter(item.type);
-        }
+        let adapter = this.createSettingItemStorage(item);
+        this.settings.set(item.key, adapter);
 
         if (item.createElement === undefined) {
             let itemElement = this.createDefaultElement(item);
@@ -305,13 +358,9 @@ export class SettingUtils {
                 }
             });
         }
-
-        if (item.localOnly) {
-            this.localOnlyItems.add(item.key);
-        }
     }
 
-    createDefaultElement(item: ISettingUtilsItem) {
+    createDefaultElement<T>(item: ISettingUtilsItem<T>) {
         let itemElement: HTMLElement;
         //阻止思源内置的回车键确认
         const preventEnterConfirm = (e) => {
@@ -353,9 +402,9 @@ export class SettingUtils {
                 sliderElement.max = item.slider?.max.toString() ?? '100';
                 sliderElement.step = item.slider?.step.toString() ?? '1';
                 sliderElement.value = item.value;
-                sliderElement.onchange = () => {
+                sliderElement.onchange = (e: Event) => {
                     sliderElement.ariaLabel = sliderElement.value;
-                    item.action?.callback();
+                    item.action?.callback(e);
                 }
                 itemElement = sliderElement;
                 break;
@@ -379,6 +428,11 @@ export class SettingUtils {
                 numberElement.type = 'number';
                 numberElement.className = 'b3-text-field fn__flex-center fn__size200';
                 numberElement.value = item.value;
+                if (item.slider) {
+                    numberElement.min = item.slider.min.toString();
+                    numberElement.max = item.slider.max.toString();
+                    numberElement.step = item.slider.step.toString();
+                }
                 itemElement = numberElement;
                 numberElement.addEventListener('keydown', preventEnterConfirm);
                 break;
@@ -413,13 +467,14 @@ export class SettingUtils {
         let item = this.settings.get(key);
         if (item.type === 'button') return;
         let element = this.elements.get(key) as any;
-        item.value = item.getEleVal(element);
+        // item.value = item.getEleVal(element);
+        item.set(item.getEleVal(element));
     }
 
     private updateElementFromValue(key: string) {
         let item = this.settings.get(key);
         if (item.type === 'button') return;
         let element = this.elements.get(key) as any;
-        item.setEleVal(element, item.value);
+        item.setEleVal(element, item.get());
     }
 }
