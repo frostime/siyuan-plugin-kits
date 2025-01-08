@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-07-13 21:19:23
  * @FilePath     : /src/settings/local-storage.ts
- * @LastEditTime : 2025-01-06 18:14:08
+ * @LastEditTime : 2025-01-06 21:52:27
  * @Description  : 
  */
 import { Plugin } from "siyuan";
@@ -20,8 +20,8 @@ import { deepMerge } from "./utils";
 export const useDevicewiseConfigs = async (plugin: Plugin, filePrefix: string = 'config.device') => {
     const device = window.siyuan.config.system;
     const fname = `${filePrefix || 'config.device'}@${device.id}.json`;
-    let config = await plugin.loadData(fname);
-    config = config || {};
+    let data = await plugin.loadData(fname);
+    const config = data || {};
     return {
         get storage() {
             return config;
@@ -78,7 +78,7 @@ export const useLocalDeviceStorage = useDevicewiseConfigs;
  */
 export const useDevicewiseValue = <T>(defaultValue: T) => {
     const device = window.siyuan.config.system;
-    let _storage: Record<string, T> = {};
+    const _storage: Record<string, T> = {};
     _storage[device.id] = defaultValue;
 
     return {
@@ -93,7 +93,7 @@ export const useDevicewiseValue = <T>(defaultValue: T) => {
          * @param values 初始值。
          */
         init: (values: Record<string, T>) => {
-            _storage = deepMerge(_storage, values);
+            Object.assign(_storage, values);
         },
         /**
          * 获取当前设备的值。
