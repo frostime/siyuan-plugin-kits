@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2025-01-01 15:47:14
+ * @LastEditTime : 2025-01-13 12:41:21
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap, Protyle } from "siyuan";
@@ -36,8 +36,8 @@ export interface PluginExtends extends Plugin {
      * @returns plugin.addTopBar 返回的 HTMLElement
      */
     registerTopbarMenu(args: Omit<Parameters<Plugin['addTopBar']>[0], 'callback'> & {
-        beforeShow: (menu: Menu, event: MouseEvent) => void,
         menus: IMenu[] | (() => IMenu[]),
+        beforeShow?: (menu: Menu, event: MouseEvent) => void,
         isLeft?: boolean
     }): HTMLElement;
 
@@ -100,7 +100,7 @@ export const addUnloadCallback = (callback: (plugin?: Plugin) => void) => {
     unloadCallbacks.push(callback);
 }
 
-export const registerPlugin = (plugin: Plugin) => {
+export const registerPlugin = <T extends Plugin>(plugin: T) => {
 
     const proxyPlugin = new Proxy(plugin, {
         get(target: Plugin, prop: string) {
@@ -134,7 +134,9 @@ export const registerPlugin = (plugin: Plugin) => {
                         for (let item of menuCreator()) {
                             menu.addItem(item);
                         }
-                        args.beforeShow && args.beforeShow(menu, event);
+                        if (args.beforeShow) {
+                            args.beforeShow(menu, event);
+                        }
                         const rect = topbar.getBoundingClientRect();
                         menu.open({
                             x: args.isLeft ? rect.right : rect.left,
