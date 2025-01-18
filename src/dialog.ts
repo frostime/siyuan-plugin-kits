@@ -11,6 +11,7 @@ import { Dialog } from "siyuan";
 export const simpleDialog = (args: {
     title: string, ele: HTMLElement | DocumentFragment,
     width?: string, height?: string,
+    maxWidth?: string, maxHeight?: string,
     callback?: () => void;
 }) => {
     const dialog = new Dialog({
@@ -21,6 +22,13 @@ export const simpleDialog = (args: {
         destroyCallback: args.callback
     });
     dialog.element.querySelector(".dialog-content")!.appendChild(args.ele);
+    const container: HTMLElement = dialog.element.querySelector(".b3-dialog__container")!;
+    if (container) {
+        Object.assign(container.style, {
+            maxWidth: args.maxWidth,
+            maxHeight: args.maxHeight
+        });
+    }
     return {
         dialog,
         close: dialog.destroy.bind(dialog)
@@ -35,8 +43,10 @@ export const confirmDialog = (args: {
     cancel?: (ele?: HTMLElement) => void;
     width?: string;
     height?: string;
+    maxWidth?: string;
+    maxHeight?: string;
 }) => {
-    const { title, content, confirm, cancel, width, height } = args;
+    const { title, content, confirm, cancel, width, height, maxWidth, maxHeight } = args;
 
     const dialog = new Dialog({
         title,
@@ -72,6 +82,15 @@ export const confirmDialog = (args: {
         }
         dialog.destroy();
     });
+
+    const container: HTMLElement = dialog.element.querySelector(".b3-dialog__container")!;
+    if (container) {
+        Object.assign(container.style, {
+            maxWidth: maxWidth,
+            maxHeight: maxHeight
+        });
+    }
+
     return {
         dialog,
         close: dialog.destroy.bind(dialog)
@@ -85,6 +104,8 @@ export const inputDialog = (args: {
     type?: 'textline' | 'textarea',
     width?: string,
     height?: string,
+    maxWidth?: string,
+    maxHeight?: string,
     fontSize?: string
 }) => {
     const dialog = new Dialog({
@@ -126,6 +147,14 @@ export const inputDialog = (args: {
         }
         dialog.destroy();
     });
+
+    const container: HTMLElement = dialog.element.querySelector(".b3-dialog__container")!;
+    if (container) {
+        Object.assign(container.style, {
+            maxWidth: args.maxWidth,
+            maxHeight: args.maxHeight
+        });
+    }
 
     return {
         dialog,
