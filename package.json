@@ -1,6 +1,6 @@
 {
   "name": "@frostime/siyuan-plugin-kits",
-  "version": "1.5.2",
+  "version": "1.5.3-beta0",
   "type": "module",
   "description": "A utility for SiYuan plugin development",
   "repository": {
@@ -20,6 +20,11 @@
       "types": "./dist/types/api.d.ts",
       "import": "./dist/api.mjs",
       "require": "./dist/api.cjs"
+    },
+    "./element": {
+      "types": "./dist/types/element.d.ts",
+      "import": "./dist/element.mjs",
+      "require": "./dist/element.cjs"
     }
   },
   "files": [

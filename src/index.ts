@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-10-09 21:09:34
  * @FilePath     : /src/index.ts
- * @LastEditTime : 2025-01-04 20:00:27
+ * @LastEditTime : 2025-01-19 15:10:52
  * @Description  : 
  */
 
@@ -16,6 +16,7 @@ export * from "./const";
 export * from "./dailynote";
 export * from "./dialog";
 export * from "./documents";
+export * as element from "./element";
 export * from "./lute";
 export * from "./javascripts";
 

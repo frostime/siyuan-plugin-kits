@@ -13,7 +13,8 @@ import del from 'rollup-plugin-delete';
 export default {
     input: {
         'index': 'src/index.ts',
-        'api': 'src/api.ts'
+        'api': 'src/api.ts',
+        'element': 'src/element.ts'
     },
     output: [
         {

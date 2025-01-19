@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-10-19 21:06:07
  * @FilePath     : /src/dailynote.ts
- * @LastEditTime : 2025-01-02 12:11:52
+ * @LastEditTime : 2025-01-19 14:53:21
  * @Description  : From git@github.com:frostime/siyuan-dailynote-today.git
  */
 
@@ -69,7 +69,7 @@ export async function getDailynoteHpath(notebookId: NotebookId, date: Date): Pro
  * @param createContent 创建日记时，日记的内容
  * @returns 
  */
-export async function createDalynote(boxId: NotebookId, date?: Date, createContent?: string) {
+export async function createDailynote(boxId: NotebookId, date?: Date, createContent?: string) {
     date = date ?? new Date();
 
     let hpath = await getDailynoteHpath(boxId, date);
@@ -85,7 +85,7 @@ export async function createDalynote(boxId: NotebookId, date?: Date, createConte
     return doc_id;
 }
 
-export const createDiary = createDalynote;
+export const createDiary = createDailynote;
 
 export const searchDailynote = async (boxId: NotebookId, date: Date): Promise<string> => {
     const dateStr = formatSiYuanDate(date);
