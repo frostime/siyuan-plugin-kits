@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2025-01-01 15:22:48
  * @FilePath     : /src/documents.ts
- * @LastEditTime : 2025-01-02 11:55:44
+ * @LastEditTime : 2025-01-24 18:23:04
  * @Description  : 
  */
 import { createDocWithMd, removeDocByID, renameDocByID, setBlockAttrs, sql, updateBlock } from "./api";
@@ -28,6 +28,79 @@ export function getActiveDoc() {
 
 
 /**
+ * Create and use a document for plugin purpose
+ * @param createOptions - The options for creating the document
+ * @param createOptions.createCallback - Custom document creation callback
+ * @param createOptions.notebook - The notebook id for creating the document
+ * @param createOptions.dir - The directory for creating the document
+ * @param createOptions.title - The title for creating the document
+ * @param createOptions.content - The content for creating the document
+ * @returns Document operation interface
+ */
+export const useDocument = async (createOptions?: {
+    notebook?: NotebookId;
+    dir?: string;
+    title?: string;
+    content?: string;
+    createCallback?: () => Promise<BlockId>;
+}): Promise<{
+    id: DocumentId;
+    setContent: (markdown: string) => Promise<unknown>;
+    setTitle: (title: string) => Promise<unknown>;
+    delete: () => Promise<unknown>;
+    setAttrs: (attrs: { [key: string]: string }) => Promise<unknown>;
+}> => {
+    let docId: DocumentId;
+    const createFun = async () => {
+        let options = {
+            notebook: null,
+            dir: '/',
+            title: 'New Doc',
+            content: '',
+            ...createOptions
+        };
+
+        if (!options.notebook) {
+            const notebooks = window.siyuan.notebooks.filter(n => n.closed === false);
+            if (notebooks.length === 0) {
+                throw new Error('No opened notebook found');
+            }
+            options.notebook = notebooks[0].id;
+        }
+        if (!options.dir.endsWith('/')) {
+            options.dir = options.dir + '/';
+        }
+        if (options.title.startsWith('/')) {
+            options.title = options.title.slice(1);
+        }
+        return await createDocWithMd(options.notebook, `${options.dir}${options.title}`, options.content);
+    }
+
+    if (createOptions?.createCallback) {
+        docId = await createOptions.createCallback();
+    } else {
+        docId = await createFun();
+    }
+
+    return {
+        id: docId,
+        setContent: async (markdown: string) => {
+            return updateBlock('markdown', markdown, docId);
+        },
+        setTitle: async (title: string) => {
+            return renameDocByID(docId, title);
+        },
+        delete: async () => {
+            return removeDocByID(docId);
+        },
+        setAttrs: async (attrs: { [key: string]: string }) => {
+            return setBlockAttrs(docId, attrs);
+        }
+    }
+}
+
+
+/**
  * Use a document that with specific attribute
  * This is useful when you want to use a specific document for your special purpose
  * @param options 
@@ -47,11 +120,11 @@ export const useDocumentWithAttr = async (options: {
     value: string;
     cond?: string;
     createOptions?: {
-        createCallback?: () => Promise<BlockId>;
         notebook?: NotebookId;
         dir?: string;
         title?: string;
         content?: string;
+        createCallback?: () => Promise<BlockId>;
     }
 }): Promise<{
     id: DocumentId;

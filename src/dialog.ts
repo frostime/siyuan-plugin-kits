@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-03-23 21:37:33
  * @FilePath     : /src/dialog.ts
- * @LastEditTime : 2024-12-19 14:48:39
+ * @LastEditTime : 2025-01-24 18:24:04
  * @Description  : 对话框相关工具
  */
 import { Dialog } from "siyuan";
@@ -31,7 +31,8 @@ export const simpleDialog = (args: {
     }
     return {
         dialog,
-        close: dialog.destroy.bind(dialog)
+        close: dialog.destroy.bind(dialog),
+        container
     };
 }
 
@@ -93,7 +94,8 @@ export const confirmDialog = (args: {
 
     return {
         dialog,
-        close: dialog.destroy.bind(dialog)
+        close: dialog.destroy.bind(dialog),
+        container
     };
 };
 
@@ -158,6 +160,7 @@ export const inputDialog = (args: {
 
     return {
         dialog,
-        close: dialog.destroy.bind(dialog)
+        close: dialog.destroy.bind(dialog),
+        container
     };
 };
