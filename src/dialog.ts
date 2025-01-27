@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-03-23 21:37:33
  * @FilePath     : /src/dialog.ts
- * @LastEditTime : 2025-01-24 18:24:04
+ * @LastEditTime : 2025-01-27 16:04:06
  * @Description  : 对话框相关工具
  */
 import { Dialog } from "siyuan";
@@ -42,6 +42,7 @@ export const confirmDialog = (args: {
     content: string | HTMLElement | DocumentFragment;
     confirm?: (ele?: HTMLElement) => void;
     cancel?: (ele?: HTMLElement) => void;
+    destroyCallback?: () => void;
     width?: string;
     height?: string;
     maxWidth?: string;
@@ -60,7 +61,8 @@ export const confirmDialog = (args: {
     <button class="b3-button b3-button--text" id="confirmDialogConfirmBtn">${window.siyuan.languages.confirm}</button>
 </div>`,
         width: width,
-        height: height
+        height: height,
+        destroyCallback: args.destroyCallback
     });
 
     const target: HTMLElement = dialog.element.querySelector(".b3-dialog__content>div.ft__breakword")!;
@@ -103,6 +105,8 @@ export const inputDialog = (args: {
     title: string,
     defaultText?: string,
     confirm?: (text: string) => void,
+    cancel?: (text: string) => void,
+    destroyCallback?: (text: string) => void,
     type?: 'textline' | 'textarea',
     width?: string,
     height?: string,
@@ -126,7 +130,10 @@ export const inputDialog = (args: {
             <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
         </div>`,
         width: args.width,
-        height: args.height
+        height: args.height,
+        destroyCallback: args.destroyCallback ? () => {
+            args.destroyCallback(inputElement.value);
+        } : undefined
     });
 
     const inputElement = dialog.element.querySelector('textarea, input') as HTMLTextAreaElement | HTMLInputElement;
@@ -140,6 +147,9 @@ export const inputDialog = (args: {
 
     const btnsElement = dialog.element.querySelectorAll('.b3-button');
     btnsElement[0].addEventListener('click', () => {
+        if (args.cancel) {
+            args.cancel(inputElement.value);
+        }
         dialog.destroy();
     });
 

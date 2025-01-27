@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-10-19 21:06:07
  * @FilePath     : /src/dailynote.ts
- * @LastEditTime : 2025-01-19 14:53:21
+ * @LastEditTime : 2025-01-27 16:31:07
  * @Description  : From git@github.com:frostime/siyuan-dailynote-today.git
  */
 
@@ -87,7 +87,12 @@ export async function createDailynote(boxId: NotebookId, date?: Date, createCont
 
 export const createDiary = createDailynote;
 
-export const searchDailynote = async (boxId: NotebookId, date: Date): Promise<string> => {
+// TODO 改为直接返回 Block 而非 BlockID
+export const searchDailynote = async (boxId: NotebookId, date: Date, options?: {
+    returnAll?: boolean;
+}): Promise<Block | Block[]> => {
+    let returnAll = options?.returnAll ?? false;
+
     const dateStr = formatSiYuanDate(date);
     const query = `
         SELECT B.*
@@ -99,5 +104,39 @@ export const searchDailynote = async (boxId: NotebookId, date: Date): Promise<st
         ) ORDER BY B.created DESC;
         `;
     const docs = await sql(query);
-    return docs?.[0]?.id ?? null;
+    // return docs?.[0]?.id ?? null;
+    if (!docs || docs.length === 0) {
+        return null;
+    }
+    if (returnAll === true) {
+        return docs;
+    }
+    return docs[0];
+}
+
+
+export const listDailynote = async (options?: {
+    boxId?: NotebookId;
+    before?: Date;
+    after?: Date;
+    limit?: number;
+}): Promise<Block[]> => {
+    const { boxId, before, after, limit } = options ?? {};
+    const query = `
+    SELECT B.*, A.value
+    FROM blocks AS B
+    LEFT JOIN attributes AS A ON B.id = A.block_id AND A.name LIKE 'custom-dailynote-%'
+    WHERE B.type = 'd'
+      ${boxId ? `AND B.box = '${boxId}'` : ''}
+      ${before ? `AND A.value <= '${formatSiYuanDate(before)}'` : ''}
+      ${after ? `AND A.value >= '${formatSiYuanDate(after)}'` : ''}
+    ORDER BY A.value DESC
+    LIMIT ${limit ?? 64};
+`;
+    const docs = await sql(query);
+    if (!docs || docs.length === 0) {
+        return [];
+    }
+    // return docs?.map(doc => docToBlock(doc)) ?? [];
+    return docs;
 }
