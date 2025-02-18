@@ -11,6 +11,8 @@ import { fetchPost, fetchSyncPost, IWebSocketData } from "siyuan";
 import { NotebookId, Notebook, NotebookConf, DocumentId, BlockId, PreviousID, ParentID, Block, IResGetTemplates, IResReadDir, IDocTreeNode } from "./types";
 import { IResGetNotebookConf, IReslsNotebooks, IResUpload, IResdoOperations, IResGetBlockKramdown, IResGetChildBlock, IResExportMdContent, IResExportResources, IResForwardProxy, IResBootProgress } from "./types";
 
+export { getBlockByID } from './search';
+
 
 export async function request(url: string, data: any) {
     let response: IWebSocketData = await fetchSyncPost(url, data);

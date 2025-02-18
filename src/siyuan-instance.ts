@@ -19,6 +19,18 @@ export const isMobile = () => {
     return getFrontend().endsWith('mobile');
 }
 
+
+export const siyuanWsParams = () => {
+    const url = new URL(window.siyuan.ws.ws.url);
+    const port = url.port;
+    const searchParams = url.searchParams;
+    return {
+        port: port,
+        app: searchParams.get('app'),
+        wsId: searchParams.get('id'),
+    }
+}
+
 /**
  * Parses and compares SiYuan kernel versions.
  * 
