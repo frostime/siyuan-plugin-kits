@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2025-01-01 16:53:40
  * @FilePath     : /src/search.ts
- * @LastEditTime : 2025-02-18 11:08:04
+ * @LastEditTime : 2025-02-18 13:56:44
  * @Description  : 
  */
 import { exportMdContent, listDocsByPath, request, sql } from "./api";
@@ -36,12 +36,11 @@ export const getMarkdown = async (id: BlockId): Promise<string> => {
             const lute = getLute();
             return lute.BlockDOM2StdMd(dom);
         case 'd':
-            const { content } = await exportMdContent(id, {
-                yfm: false,
-                refMode: 2,
-                embedMode: 0
+            // https://github.com/siyuan-note/siyuan/issues/14032
+            const data = await exportMdContent(id, {
+                yfm: false
             });
-            return content;
+            return data?.content;
         default:
             return block.markdown;
     }
