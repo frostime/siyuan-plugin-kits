@@ -355,11 +355,7 @@ export async function sql(sql: string): Promise<any[]> {
     return request(url, sqldata);
 }
 
-export async function getBlockByID(blockId: string): Promise<Block> {
-    let sqlScript = `select * from blocks where id ='${blockId}'`;
-    let data = await sql(sqlScript);
-    return data[0];
-}
+
 
 // **************************************** Template ****************************************
 
@@ -453,9 +449,24 @@ export async function readDir(path: string): Promise<IResReadDir[]> {
 
 // **************************************** Export ****************************************
 
-export async function exportMdContent(id: DocumentId): Promise<IResExportMdContent> {
+/**
+ * Export Markdown content
+ * See {@link https://github.com/siyuan-note/siyuan/issues/14032}
+ * @param id 
+ * @param options 
+ * @param options.refMode 2: 锚文本块链; 3: 仅锚文本; 4: 块引用转脚注 + 锚点哈希
+ * @param options.embedMode 0: 使用原始文本; 1: 使用 Blockquote
+ * @param options.yfm Export YAML information or not
+ * @returns 
+ */
+export async function exportMdContent(id: DocumentId, options?: {
+    refMode?: 2 | 3 | 4;
+    embedMode?: 0 | 1;
+    yfm?: boolean;
+}): Promise<IResExportMdContent> {
     let data = {
-        id: id
+        id: id,
+        ...(options ?? {})
     }
     let url = '/api/export/exportMdContent';
     return request(url, data);

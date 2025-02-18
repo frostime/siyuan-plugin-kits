@@ -3,14 +3,15 @@
  * @Author       : frostime
  * @Date         : 2024-10-19 21:06:07
  * @FilePath     : /src/dailynote.ts
- * @LastEditTime : 2025-01-27 16:31:07
+ * @LastEditTime : 2025-02-18 11:24:05
  * @Description  : From git@github.com:frostime/siyuan-dailynote-today.git
  */
 
 import { formatDateTime, formatSiYuanDate } from "./time";
-import { createDocWithMd, getIDsByHPath, getNotebookConf, renderSprig, setBlockAttrs, sql } from "./api";
+import { appendBlock, createDocWithMd, getIDsByHPath, getNotebookConf, renderSprig, request, setBlockAttrs, sql } from "./api";
 import { Block, NotebookId } from "./types";
 import { getNotebook } from "./siyuan-instance";
+import { thisPlugin } from "./plugin-instance";
 
 /**
  * 对 DailyNote 的自定义属性进行设置, custom-dailynote-yyyyMMdd: yyyyMMdd
@@ -60,7 +61,6 @@ export async function getDailynoteHpath(notebookId: NotebookId, date: Date): Pro
     return hpath;
 }
 
-
 /**
  * 创建 dailynote 日记
  * 如果已经存在，在直接返回 id；如果不存在，则创建日记并返回 id
@@ -70,6 +70,7 @@ export async function getDailynoteHpath(notebookId: NotebookId, date: Date): Pro
  * @returns 
  */
 export async function createDailynote(boxId: NotebookId, date?: Date, createContent?: string) {
+    let isToday = date === undefined;
     date = date ?? new Date();
 
     let hpath = await getDailynoteHpath(boxId, date);
@@ -78,16 +79,40 @@ export async function createDailynote(boxId: NotebookId, date?: Date, createCont
         return ids[0];
     }
 
-    let doc_id = await createDocWithMd(boxId, hpath, createContent || "");
+    let docId: string = "";
+    if (isToday) {
+        let url = '/api/filetree/createDailyNote';
+        let result = await request(url, { notebook: boxId, app: thisPlugin().app });
+        docId = result.id as string;
+    } else {
+        docId = await createDocWithMd(boxId, hpath, createContent || "");
+        if (createContent === undefined) {
+            const notebookConf = await getNotebookConf(boxId);
+            // notebookConf.conf.dailyNoteTemplatePath;
+            const dataDir = window.siyuan.config.system.dataDir;
+            const templatePath = `${dataDir}/templates/${notebookConf.conf.dailyNoteTemplatePath}`;
 
-    await setCustomDNAttr(doc_id, date);
+            const { content } = await request('/api/template/render', {
+                id: docId,
+                path: templatePath,
+                preview: false
+            });
+            await appendBlock('dom', content, docId);
+        }
+    }
 
-    return doc_id;
+    if (!docId) {
+        return null;
+    }
+
+    await setCustomDNAttr(docId, date);
+
+    return docId;
 }
 
 export const createDiary = createDailynote;
 
-// TODO 改为直接返回 Block 而非 BlockID
+
 export const searchDailynote = async (boxId: NotebookId, date: Date, options?: {
     returnAll?: boolean;
 }): Promise<Block | Block[]> => {

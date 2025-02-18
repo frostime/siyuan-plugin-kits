@@ -1,6 +1,21 @@
-import { getBlockByID, listDocsByPath, request, sql } from "./api";
+/*
+ * Copyright (c) 2025 by frostime. All Rights Reserved.
+ * @Author       : frostime
+ * @Date         : 2025-01-01 16:53:40
+ * @FilePath     : /src/search.ts
+ * @LastEditTime : 2025-02-18 11:08:04
+ * @Description  : 
+ */
+import { exportMdContent, listDocsByPath, request, sql } from "./api";
 import { getLute } from "./lute";
 import { Block, BlockId } from "./types";
+
+
+export async function getBlockByID(blockId: string): Promise<Block> {
+    let sqlScript = `select * from blocks where id ='${blockId}'`;
+    let data = await sql(sqlScript);
+    return data?.[0];
+}
 
 /**
  * Get the markdown content of a block
@@ -12,19 +27,23 @@ import { Block, BlockId } from "./types";
  */
 export const getMarkdown = async (id: BlockId): Promise<string> => {
     let block: Block = await getBlockByID(id);
-    if (block.type === 'd') {
-        const { content } = await request('/api/export/exportMdContent', {
-            id: id
-        });
-        return content;
-    } else if (block.type === 'h') {
-        let dom = await request('/api/block/getHeadingChildrenDOM', {
-            id
-        });
-        const lute = getLute();
-        return lute.BlockDOM2StdMd(dom);
-    } else {
-        return block.markdown;
+    if (!block) return null;
+    switch (block.type) {
+        case 'h':
+            let dom = await request('/api/block/getHeadingChildrenDOM', {
+                id
+            });
+            const lute = getLute();
+            return lute.BlockDOM2StdMd(dom);
+        case 'd':
+            const { content } = await exportMdContent(id, {
+                yfm: false,
+                refMode: 2,
+                embedMode: 0
+            });
+            return content;
+        default:
+            return block.markdown;
     }
 }
 
