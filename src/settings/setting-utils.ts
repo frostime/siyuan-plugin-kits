@@ -3,13 +3,13 @@
  * @Author       : frostime
  * @Date         : 2023-12-17 18:28:19
  * @FilePath     : /src/settings/setting-utils.ts
- * @LastEditTime : 2025-01-06 20:34:26
+ * @LastEditTime : 2025-02-24 23:38:27
  * @Description  : 
  */
 
 import { Plugin, Setting } from 'siyuan';
 import { TSettingItemType, ISettingUtilsItem, ISettingItemAdapter } from './types';
-import { useDevicewiseValue } from './local-storage';
+// import { useDevicewiseValue } from './local-storage';
 import { createSettingItemAdapter } from './setting-adpater';
 
 /**
@@ -291,7 +291,7 @@ export class SettingUtils {
         let data: any = {};
         for (let [key, storage] of this.settings) {
             if (storage.type === 'button') continue;
-            data[key] = storage.storage;
+            data[key] = storage.get();
         }
         return data;
     }
@@ -464,17 +464,18 @@ export class SettingUtils {
     }
 
     private updateValueFromElement(key: string) {
-        let item = this.settings.get(key);
-        if (item.type === 'button') return;
+        let item: ISettingUtilsItemStorage = this.settings.get(key);
+        if (item.type === 'button' || item.type === 'hint') return;
         let element = this.elements.get(key) as any;
-        // item.value = item.getEleVal(element);
-        item.set(item.getEleVal(element));
+        const value = item.getEleVal(element);
+        item.set(value);
     }
 
     private updateElementFromValue(key: string) {
-        let item = this.settings.get(key);
-        if (item.type === 'button') return;
+        let item: ISettingUtilsItemStorage = this.settings.get(key);
+        if (item.type === 'button' || item.type === 'hint') return;
         let element = this.elements.get(key) as any;
-        item.setEleVal(element, item.get());
+        const value = item.get();
+        item.setEleVal(element, value);
     }
 }

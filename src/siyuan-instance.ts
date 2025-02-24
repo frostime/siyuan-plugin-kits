@@ -167,3 +167,60 @@ export function translateHotkey(hotkey: string): string {
     // 连接所有键
     return translatedKeys.join('');
 }
+
+
+
+/**
+ * 检查给定的快捷键是否与现有键映射冲突。
+ * @param hotkey - 需要检查的快捷键字符串, 输入的字符必须是思源内定义的快捷键格式，可以用 translateHotkey 函数转换。
+ * @returns 返回一个数组，包含所有与 `hotkey` 冲突的键映射路径及其 `custom` 和 `default` 值。
+ */
+export const checkHotkeyConflict = (hotkey: string) => {
+    const root: object = window.siyuan.config.keymap;
+
+    let conflict: {
+        path: string;
+        accessor: () => ({ custom: string; default: string });
+        custom: string;
+        default: string;
+        isCustomConflict: boolean;  // custom 和当前 hotkey 冲突
+    }[] = [];
+
+    /**
+     * 深度优先遍历键映射对象，检查快捷键冲突。
+     * @param keymapObj - 当前遍历的键映射对象。
+     * @param path - 当前路径，用于记录键映射的层级关系。
+     */
+    const dfs = (keymapObj: object, path: string[]) => {
+        // 如果当前对象是叶子节点（包含 `custom` 和 `default` 属性）
+        if ('custom' in keymapObj && 'default' in keymapObj) {
+            // 检查 `custom` 或 `default` 是否与 `hotkey` 冲突
+            if (keymapObj['custom'] === hotkey || keymapObj['default'] === hotkey) {
+                conflict.push({
+                    path: path.join('.'),
+                    custom: keymapObj['custom'] as string,
+                    default: keymapObj['default'] as string,
+                    isCustomConflict: keymapObj['custom'] === hotkey,
+                    accessor: () => {
+                        // 根据路径访问冲突的键映射节点
+                        let node = root;
+                        for (let p of path) {
+                            node = node[p];
+                        }
+                        return node as { custom: string; default: string };
+                    }
+                });
+            }
+        } else {
+            // 如果不是叶子节点，继续递归遍历子节点
+            for (const key in keymapObj) {
+                dfs(keymapObj[key], [...path, key]);
+            }
+        }
+    };
+
+    // 从根节点开始遍历
+    dfs(root, []);
+
+    return conflict;
+};

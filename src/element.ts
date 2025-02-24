@@ -200,3 +200,32 @@ export function TextInput(props: {
     setStyles(input, props.style);
     return input;
 }
+
+
+export function KeymapTextInput(props: {
+    changed: (keymap: string) => void;
+    value?: string;
+    style?: Partial<CSSStyleDeclaration>;
+}): HTMLInputElement {
+    const input = TextInput({
+        value: props.value,
+        style: props.style
+    });
+
+    // Prevent direct typing into the input
+    input.onkeydown = (e) => {
+        e.preventDefault();
+        const key = e.key;
+        const modifiers = [];
+        if (e.ctrlKey) modifiers.push('Ctrl');
+        if (e.shiftKey) modifiers.push('Shift');
+        if (e.altKey) modifiers.push('Alt');
+        if (e.metaKey) modifiers.push('Meta');
+
+        const keymap = modifiers.length > 0 ? `${modifiers.join('+')}+${key}` : key;
+        input.value = keymap;
+        props.changed(keymap);
+    };
+
+    return input;
+}

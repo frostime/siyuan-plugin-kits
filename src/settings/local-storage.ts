@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-07-13 21:19:23
  * @FilePath     : /src/settings/local-storage.ts
- * @LastEditTime : 2025-01-06 21:52:27
+ * @LastEditTime : 2025-02-25 00:10:26
  * @Description  : 
  */
 import { Plugin } from "siyuan";
