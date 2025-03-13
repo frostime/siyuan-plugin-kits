@@ -91,13 +91,15 @@ export async function createDailynote(boxId: NotebookId, date?: Date, createCont
             // notebookConf.conf.dailyNoteTemplatePath;
             const dataDir = window.siyuan.config.system.dataDir;
             const templatePath = `${dataDir}/templates/${notebookConf.conf.dailyNoteTemplatePath}`;
-
-            const { content } = await request('/api/template/render', {
-                id: docId,
-                path: templatePath,
-                preview: false
-            });
-            await appendBlock('dom', content, docId);
+            // Check if template path ends with .md
+            if (templatePath.endsWith('.md')) {
+                const { content } = await request('/api/template/render', {
+                    id: docId,
+                    path: templatePath,
+                    preview: false
+                });
+                await appendBlock('dom', content, docId);
+            }
         }
     }
 
