@@ -3,11 +3,11 @@
  * @Author       : frostime
  * @Date         : 2024-06-08 20:36:30
  * @FilePath     : /src/const.ts
- * @LastEditTime : 2025-01-01 17:23:17
+ * @LastEditTime : 2025-03-12 16:19:47
  * @Description  : 
  */
 
-import { BlockSubType, BlockType } from "./types";
+import type { Block, BlockSubType, BlockType } from "./types";
 
 export const SIAYUN_ATTR = {
     READONLY: 'custom-sy-readonly',
@@ -97,6 +97,8 @@ export const BlockType2NodeType: { [key in BlockType]: string } = {
     audio: 'NodeAudio'
 }
 
+export const NodeType2BlockType: { [key in string]: BlockType } = Object.fromEntries(Object.entries(BlockType2NodeType).map(([key, value]) => [value, key as BlockType]));
+
 
 export const NodeIcons = {
     NodeAttributeView: {
@@ -166,3 +168,21 @@ export const NodeIcons = {
         icon: "iconBoth"
     }
 };
+
+
+export const getBlockTypeIcon = (block: Block) => {
+    const nodeType = BlockType2NodeType[block.type];
+    const icon = NodeIcons[nodeType];
+    if (!icon) {
+        return '';
+    }
+
+    if (block.subtype) {
+        const subtype = icon.subtypes?.[block.subtype];
+        if (subtype) {
+            return subtype.icon;
+        }
+    }
+
+    return icon.icon;
+}
