@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2025-01-18 21:49:39
+ * @LastEditTime : 2025-03-26 21:01:17
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap, Protyle } from "siyuan";
@@ -70,7 +70,7 @@ export interface PluginExtends extends Plugin {
     /**
      * Load a blob from storage
      * @param storageName Storage name
-     * @param prefix Storage path prefix
+     * @param prefix Storage path prefix; default is `/data/storage/petal/{{plugin}}`
      */
     loadBlob(storageName: string, prefix?: string): Promise<Blob | null>;
 
@@ -78,7 +78,7 @@ export interface PluginExtends extends Plugin {
      * Save data as blob to storage
      * @param storageName Storage name
      * @param data Data to save (Blob, File, Object, or string)
-     * @param prefix Storage path prefix
+     * @param prefix Storage path prefix; default is `/data/storage/petal/{{plugin}}`
      */
     saveBlob(storageName: string, data: Blob | File | Object | string, prefix?: string): Promise<Blob | null>;
 

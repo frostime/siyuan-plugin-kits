@@ -449,6 +449,35 @@ export async function readDir(path: string): Promise<IResReadDir[]> {
 }
 
 
+export async function saveBlob(filePath: string, data: Blob | File | Object | string) {
+    let dataBlob: Blob | File;
+
+    if (data instanceof Blob) {
+        dataBlob = data;
+    } else if (data instanceof File) {
+        dataBlob = data;
+    } else if (typeof data === 'object') {
+        dataBlob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    } else if (typeof data === 'string') {
+        if (filePath.endsWith('.json')) {
+            dataBlob = new Blob([data], { type: 'application/json' });
+        } else {
+            dataBlob = new Blob([data], { type: 'text/plain' });
+        }
+    } else {
+        throw new Error('Unsupported data type');
+    }
+
+    const fname = filePath.split("/").pop();
+
+    const file = new File([dataBlob], fname);
+
+    return putFile(filePath, false, file);
+}
+
+export const loadBlob = getFileBlob;
+
+
 // **************************************** Export ****************************************
 
 /**
