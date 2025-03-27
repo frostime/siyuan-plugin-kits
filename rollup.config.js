@@ -23,13 +23,6 @@ export default {
             preserveModules: true,
             entryFileNames: '[name].mjs',
             exports: 'named'
-        },
-        {
-            dir: 'dist',
-            format: 'cjs',
-            preserveModules: true,
-            entryFileNames: '[name].cjs',
-            exports: 'named'
         }
     ],
     external: ['siyuan'],

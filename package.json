@@ -1,30 +1,30 @@
 {
   "name": "@frostime/siyuan-plugin-kits",
-  "version": "1.5.10",
+  "version": "1.6.0-beta",
   "type": "module",
   "description": "A utility for SiYuan plugin development",
   "repository": {
     "type": "git",
     "url": "https://github.com/frostime/siyuan-plugin-kits.git"
   },
-  "main": "dist/index.cjs",
+  "main": "dist/index.mjs",
   "module": "dist/index.mjs",
   "types": "dist/types/index.d.ts",
+  "sideEffects": [
+    "./src/plugin-instance.ts"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.mjs"
     },
     "./api": {
       "types": "./dist/types/api.d.ts",
-      "import": "./dist/api.mjs",
-      "require": "./dist/api.cjs"
+      "import": "./dist/api.mjs"
     },
     "./element": {
       "types": "./dist/types/element.d.ts",
-      "import": "./dist/element.mjs",
-      "require": "./dist/element.cjs"
+      "import": "./dist/element.mjs"
     }
   },
   "files": [
@@ -50,6 +50,6 @@
     "access": "public"
   },
   "dependencies": {
-    "siyuan": "latest"
+    "siyuan": "1.*"
   }
 }
