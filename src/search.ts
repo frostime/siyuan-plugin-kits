@@ -3,10 +3,10 @@
  * @Author       : frostime
  * @Date         : 2025-01-01 16:53:40
  * @FilePath     : /src/search.ts
- * @LastEditTime : 2025-02-18 13:56:44
+ * @LastEditTime : 2025-05-10 22:30:05
  * @Description  : 
  */
-import { exportMdContent, listDocsByPath, request, sql } from "./api";
+import { listDocsByPath, request, sql } from "./api";
 import { getLute } from "./lute";
 import { Block, BlockId } from "./types";
 
@@ -16,6 +16,27 @@ export async function getBlockByID(blockId: string): Promise<Block> {
     let data = await sql(sqlScript);
     return data?.[0];
 }
+
+
+export const getChildBlocks = async (id: BlockId): Promise<{id: BlockId; markdown: string; type: string}[]> => {
+    return request('/api/block/getChildBlocks', { id });
+}
+
+/**
+ * 获取文档内容
+ * @param docId 文档ID
+ * @returns 文档Markdown内容
+ */
+export const getDocumentMarkdown = async (docId: string): Promise<string> => {
+    try {
+        // 获取文档内容
+        const result = await getChildBlocks(docId);
+        return result.join('\n\n');
+    } catch (error) {
+        console.error("获取文档内容失败", error);
+        throw error;
+    }
+};
 
 /**
  * Get the markdown content of a block
@@ -36,11 +57,7 @@ export const getMarkdown = async (id: BlockId): Promise<string> => {
             const lute = getLute();
             return lute.BlockDOM2StdMd(dom);
         case 'd':
-            // https://github.com/siyuan-note/siyuan/issues/14032
-            const data = await exportMdContent(id, {
-                yfm: false
-            });
-            return data?.content;
+            return getDocumentMarkdown(id);
         default:
             return block.markdown;
     }

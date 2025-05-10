@@ -1,11 +1,11 @@
-import { IProtyle, Protyle, ISiyuan } from 'siyuan';
+import type { IProtyle, Plugin } from 'siyuan';
 
 /*
  * Copyright (c) 2024 by frostime. All Rights Reserved.
  * @Author       : frostime
  * @Date         : 2023-08-15 10:28:10
  * @FilePath     : /src/types/index.ts
- * @LastEditTime : 2025-01-02 12:17:19
+ * @LastEditTime : 2025-05-09 16:56:26
  * @Description  : Frequently used data structures in SiYuan
  */
 export * from './api';
@@ -105,12 +105,7 @@ export type doOperation = {
     retData: null;
 }
 
-export interface IPluginProtyleSlash {
-    filter: string[],
-    html: string,
-    id: string,
-    callback(protyle: Protyle): void,
-};
+export type IPluginProtyleSlash = Plugin['protyleSlash'][number];
 
 export interface ISiyuanEventPaste {
     protyle: IProtyle,

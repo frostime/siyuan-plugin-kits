@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-12-18 20:38:19
  * @FilePath     : /src/plugin-instance.ts
- * @LastEditTime : 2025-03-26 21:01:17
+ * @LastEditTime : 2025-05-09 16:56:40
  * @Description  : 
  */
 import { Plugin, App, Custom, openTab, IMenu, Menu, IEventBusMap, Protyle } from "siyuan";
