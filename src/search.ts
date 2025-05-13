@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2025-01-01 16:53:40
  * @FilePath     : /src/search.ts
- * @LastEditTime : 2025-05-10 22:30:05
+ * @LastEditTime : 2025-05-13 18:57:12
  * @Description  : 
  */
 import { listDocsByPath, request, sql } from "./api";
@@ -18,7 +18,7 @@ export async function getBlockByID(blockId: string): Promise<Block> {
 }
 
 
-export const getChildBlocks = async (id: BlockId): Promise<{id: BlockId; markdown: string; type: string}[]> => {
+export const getChildBlocks = async (id: BlockId): Promise<{ id: BlockId; markdown: string; type: string }[]> => {
     return request('/api/block/getChildBlocks', { id });
 }
 
@@ -31,7 +31,7 @@ export const getDocumentMarkdown = async (docId: string): Promise<string> => {
     try {
         // 获取文档内容
         const result = await getChildBlocks(docId);
-        return result.join('\n\n');
+        return result.map(b => b.markdown).join('\n\n');
     } catch (error) {
         console.error("获取文档内容失败", error);
         throw error;
@@ -49,17 +49,13 @@ export const getDocumentMarkdown = async (docId: string): Promise<string> => {
 export const getMarkdown = async (id: BlockId): Promise<string> => {
     let block: Block = await getBlockByID(id);
     if (!block) return null;
-    switch (block.type) {
-        case 'h':
-            let dom = await request('/api/block/getHeadingChildrenDOM', {
-                id
-            });
-            const lute = getLute();
-            return lute.BlockDOM2StdMd(dom);
-        case 'd':
-            return getDocumentMarkdown(id);
-        default:
-            return block.markdown;
+    if (block.type === 'd' || block.type === 'h') {
+        const childBlocks = await request('/api/block/getChildBlocks', { id });
+        const bodyContent = childBlocks.map(b => b.markdown).join('\n\n');
+        const markdown = block.type === 'd' ? bodyContent : `${block.markdown}\n\n${bodyContent}`;
+        return markdown;
+    } else {
+        return block.markdown;
     }
 }
 
