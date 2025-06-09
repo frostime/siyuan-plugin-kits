@@ -3,11 +3,10 @@
  * @Author       : frostime
  * @Date         : 2025-01-01 16:53:40
  * @FilePath     : /src/search.ts
- * @LastEditTime : 2025-05-13 18:57:12
+ * @LastEditTime : 2025-06-09 14:02:59
  * @Description  : 
  */
 import { listDocsByPath, request, sql } from "./api";
-import { getLute } from "./lute";
 import { Block, BlockId } from "./types";
 
 

@@ -3,7 +3,7 @@
  * @Author       : frostime
  * @Date         : 2024-10-19 21:06:07
  * @FilePath     : /src/dailynote.ts
- * @LastEditTime : 2025-02-18 11:24:05
+ * @LastEditTime : 2025-06-09 14:09:03
  * @Description  : From git@github.com:frostime/siyuan-dailynote-today.git
  */
 
@@ -70,8 +70,9 @@ export async function getDailynoteHpath(notebookId: NotebookId, date: Date): Pro
  * @returns 
  */
 export async function createDailynote(boxId: NotebookId, date?: Date, createContent?: string) {
-    let isToday = date === undefined;
-    date = date ?? new Date();
+    let _date = new Date();
+    let isToday = date === undefined || date.toDateString() === _date.toDateString();
+    date = date ?? _date;
 
     let hpath = await getDailynoteHpath(boxId, date);
     let ids = await getIDsByHPath(boxId, hpath);

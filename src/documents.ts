@@ -3,10 +3,11 @@
  * @Author       : frostime
  * @Date         : 2025-01-01 15:22:48
  * @FilePath     : /src/documents.ts
- * @LastEditTime : 2025-01-24 18:23:04
+ * @LastEditTime : 2025-06-09 14:07:45
  * @Description  : 
  */
-import { createDocWithMd, removeDocByID, renameDocByID, setBlockAttrs, sql, updateBlock } from "./api";
+import { createDocWithMd, listDocsByPath, removeDocByID, renameDocByID, setBlockAttrs, sql, updateBlock } from "./api";
+import { getBlockByID, id2block, searchChildDocs } from "./search";
 import { BlockId, DocumentId, NotebookId } from "./types";
 
 export function getActiveDoc() {
@@ -225,4 +226,100 @@ export const useDocumentWithAttr = async (options: {
         id: docId,
         ...(mixin(docId))
     }
+}
+
+
+export const getParentDoc = async (docId: DocumentId) => {
+    const doc = await getBlockByID(docId);
+    if (!doc) {
+        return null;
+    }
+
+    const path = doc.path;
+    const parts = path.split('/').filter(p => p !== '');
+    if (parts.length <= 1) {
+        return null;
+    }
+    // 获取倒数第二个
+    const parentId = parts[parts.length - 2];
+    const parentDoc = await getBlockByID(parentId);
+    if (!parentDoc) {
+        return null;
+    }
+    return parentDoc;
+}
+
+
+/**
+ * 列出子文档
+ */
+export const listSubDocs = (root: DocumentId, depth = 1) => {
+    const MAX_DEPTH = 8;
+    const buildTree = async (docId: DocumentId, depth = 1) => {
+        if (depth > MAX_DEPTH) return [];
+        let children = await searchChildDocs(docId);
+        //@ts-ignore
+        children = children.map(documentMapper);
+        const result = [];
+
+        for (const child of children) {
+            result.push({
+                ...child,
+                children: await buildTree(child.id, depth + 1)
+            });
+        }
+
+        return result;
+    };
+    if (root) {
+        return buildTree(root, depth);
+    }
+}
+
+
+export const listSiblingDocs = async (docId: DocumentId) => {
+    const doc = await getBlockByID(docId);
+    if (!doc) {
+        return null;
+    }
+
+    const path = doc.path;
+    const parts = path.split('/');
+    if (parts.length <= 1) {
+        return null;
+    }
+
+    const parentPath = parts.slice(0, -1).join('/');
+    const docs = await listDocsByPath(doc.box, parentPath);
+    if (!docs || docs.length === 0) {
+        return null;
+    }
+
+    let blocks = await id2block(docs.files.map(doc => doc.id));
+    return blocks;
+}
+
+export const listNotebookDocs = async (notebookId: NotebookId, depth: number = 1) => {
+    let topLevel = await listDocsByPath(notebookId, '');
+    if (!topLevel || topLevel.length === 0) {
+        return null;
+    }
+
+    let topLevelDocs = await id2block(topLevel.files.map(doc => doc.id));
+    if (depth === undefined || depth === 1) {
+        return topLevelDocs;
+    }
+
+    const subDepth = depth - 1;
+    const subDocs = await Promise.all(
+        topLevelDocs.map(async (doc) => {
+            const subDocs = await listSubDocs(doc.id, subDepth);
+            return {
+                ...doc,
+                children: subDocs
+            };
+        })
+    );
+
+    return subDocs;
 }
