@@ -66,10 +66,25 @@ export async function getDailynoteHpath(notebookId: NotebookId, date: Date): Pro
  * 如果已经存在，在直接返回 id；如果不存在，则创建日记并返回 id
  * @param boxId 
  * @param date 
- * @param createContent 创建日记时，日记的内容
+ * @param content 创建日记时，日记的内容
  * @returns 
  */
-export async function createDailynote(boxId: NotebookId, date?: Date, createContent?: string) {
+export async function createDailynote(boxId: NotebookId, date?: Date, content?: string, appId?: string): Promise<string | null>;
+export async function createDailynote(boxId: NotebookId, date: Date | undefined, options: { content?: string; appId?: string }): Promise<string | null>;
+// 实现体
+export async function createDailynote(
+    boxId: NotebookId,
+    date?: Date,
+    contentOrOptions?: string | { content?: string; appId?: string },
+    appId?: string
+): Promise<string | null> {
+    let content: string | undefined;
+    if (typeof contentOrOptions === "object" && contentOrOptions !== null) {
+        content = contentOrOptions.content;
+        appId = contentOrOptions.appId;
+    } else {
+        content = contentOrOptions as string | undefined;
+    }
     let _date = new Date();
     let isToday = date === undefined || date.toDateString() === _date.toDateString();
     date = date ?? _date;
@@ -82,24 +97,28 @@ export async function createDailynote(boxId: NotebookId, date?: Date, createCont
 
     let docId: string = "";
     if (isToday) {
+        if (!appId) {
+            const plugin = thisPlugin();
+            appId = plugin.app.appId;
+        }
         let url = '/api/filetree/createDailyNote';
-        let result = await request(url, { notebook: boxId, app: thisPlugin().app });
+        let result = await request(url, { notebook: boxId, app: appId });
         docId = result.id as string;
     } else {
-        docId = await createDocWithMd(boxId, hpath, createContent || "");
-        if (createContent === undefined) {
+        docId = await createDocWithMd(boxId, hpath, content || "");
+        if (content === undefined) {
             const notebookConf = await getNotebookConf(boxId);
             // notebookConf.conf.dailyNoteTemplatePath;
             const dataDir = window.siyuan.config.system.dataDir;
             const templatePath = `${dataDir}/templates/${notebookConf.conf.dailyNoteTemplatePath}`;
             // Check if template path ends with .md
             if (templatePath.endsWith('.md')) {
-                const { content } = await request('/api/template/render', {
+                const { content: tplContent } = await request('/api/template/render', {
                     id: docId,
                     path: templatePath,
                     preview: false
                 });
-                await appendBlock('dom', content, docId);
+                await appendBlock('dom', tplContent, docId);
             }
         }
     }
