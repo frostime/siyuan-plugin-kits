@@ -383,16 +383,23 @@ export async function renderSprig(template: string): Promise<string> {
 
 // **************************************** File ****************************************
 
-export async function getFile(path: string): Promise<any> {
+export async function getFile(path: string, type?: "text" | "json"): Promise<string | object> {
     let data = {
         path: path
     }
     let url = '/api/file/getFile';
-    return new Promise((resolve, _) => {
-        fetchPost(url, data, (content: any) => {
-            resolve(content)
-        });
+    let promise = new Promise<IWebSocketData>((resolve, reject) => {
+        try {
+            fetchPost(url, data, (response: any) => {
+                let data = type === 'json' ? JSON.parse(response) : response;
+                resolve(data);
+            });
+        } catch (error) {
+            reject(error);
+        }
     });
+    let response: IWebSocketData = await promise;
+    return response;
 }
 
 /**
@@ -419,16 +426,15 @@ export async function putFile(path: string, isDir: boolean, file: File | Blob) {
     let form = new FormData();
     form.append('path', path);
     form.append('isDir', isDir.toString());
-    // Copyright (c) 2023, terwer.
-    // https://github.com/terwer/siyuan-plugin-importer/blob/v1.4.1/src/api/kernel-api.ts
-    form.append('modTime', Math.floor(Date.now() / 1000).toString());
+
+    form.append('modTime', Math.floor(Date.now()).toString());
     // form.append('file', file);
     if (file instanceof File) {
         form.append('file', file);
     } else if (file instanceof Blob) {
         form.append('file', file);
     } else {
-        throw new Error('file must be File or Blob');
+        form.append('file', new Blob());
     }
 
     let url = '/api/file/putFile';
