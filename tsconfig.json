@@ -1,27 +1,24 @@
 {
-    "compilerOptions": {
-        "target": "ES2022",
-        "module": "ESNext",
-        "lib": [
-            "ESNext",
-            "DOM"
-        ],
-        "declaration": true,
-        "outDir": "./dist",
-        "strict": false,
-        "esModuleInterop": true,
-        "moduleResolution": "node",  //重要
-        // "jsx": "preserve",
-        // "jsxImportSource": "solid-js"
-        "paths": {
-            "@/*": ["./src/*"]
-        }
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext", "DOM"],
+
+    "declaration": true,
+    "declarationDir": "./dist/types",
+
+    "strict": false,
+    "noEmitOnError": true,
+
+    "esModuleInterop": true,
+
+    "paths": {
+      "@/*": ["./src/*"],
     },
-    "include": [
-        "src/**/*"
-    ],
-    "exclude": [
-        "node_modules",
-        "**/*.test.ts"
-    ]
+  },
+
+  "include": ["src/**/*"],
+
+  "exclude": ["node_modules", "**/*.test.ts"],
 }

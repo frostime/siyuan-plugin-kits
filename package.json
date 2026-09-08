@@ -38,16 +38,16 @@
   "author": "frostime",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^16.0.0",
-    "@rollup/plugin-typescript": "^12.1.2",
-    "rollup": "^4.28.1",
-    "rollup-plugin-delete": "^2.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "rollup": "^4.63.1",
+    "rollup-plugin-delete": "^3.0.2",
+    "siyuan": "1.2.4",
     "tslib": "^2.8.1",
-    "typescript": "^4.9.5",
-    "siyuan": ">=1.2.4 <2"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
-      "siyuan": ">=1.2.4"
+    "siyuan": ">=1.2.4 <2"
   },
   "private": false,
   "publishConfig": {

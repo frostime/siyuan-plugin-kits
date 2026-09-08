@@ -3,18 +3,19 @@
  * @Author       : frostime
  * @Date         : 2024-10-09 21:09:16
  * @FilePath     : /rollup.config.js
- * @LastEditTime : 2024-12-27 16:15:38
- * @Description  : 
+ * @LastEditTime : 2026-09-08 15:15:38
+ * @Description  :
  */
+import { defineConfig } from 'rollup';
 import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import del from 'rollup-plugin-delete';
 
-export default {
+export default defineConfig({
     input: {
-        'index': 'src/index.ts',
-        'api': 'src/api.ts',
-        'element': 'src/element.ts'
+        index: 'src/index.ts',
+        api: 'src/api.ts',
+        element: 'src/element.ts'
     },
     output: [
         {
@@ -32,17 +33,15 @@ export default {
             exports: 'named'
         }
     ],
-    external: ['siyuan'],
+    external: id => id === 'siyuan' || id.startsWith('siyuan/'),
     plugins: [
-        del({ targets: 'dist/*' }),
+        del({
+            targets: 'dist/*',
+            runOnce: true
+        }),
         resolve(),
         typescript({
-            tsconfig: './tsconfig.json',
-            include: ['src/**/*'],
-            exclude: ['node_modules/**'],
-            inlineSources: true,
-            declaration: true,
-            declarationDir: './dist/types'
+            tsconfig: './tsconfig.json'
         })
     ]
-};
+});
