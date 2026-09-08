@@ -28,3 +28,4 @@ export * from "./siyuan-instance";
 
 export * from "./style";
 export * from "./time";
+export * from "./version";

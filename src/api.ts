@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2023 frostime. All rights reserved.
  * https://github.com/frostime/sy-plugin-template-vite
- * 
+ *
  * See API Document in [API.md](https://github.com/siyuan-note/siyuan/blob/master/API.md)
  * API 文档见 [API_zh_CN.md](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
  */
@@ -10,6 +10,25 @@ import { fetchPost, fetchSyncPost, IWebSocketData } from "siyuan";
 
 import { NotebookId, Notebook, NotebookConf, DocumentId, BlockId, PreviousID, ParentID, Block, IResGetTemplates, IResReadDir, IDocTreeNode } from "./types";
 import { IResGetNotebookConf, IReslsNotebooks, IResUpload, IResdoOperations, IResGetBlockKramdown, IResGetChildBlock, IResExportMdContent, IResExportResources, IResForwardProxy, IResBootProgress } from "./types";
+import { siyuanVersion } from "./version";
+
+/**
+ * 自 v3.8.3 起, 内核在插件存储 (data/storage/petal) 变更时向各前端实例广播 onDataChanged,
+ * 并以 putFile/removeFile 请求中自报的 `app` 字段识别并排除发起写入的实例 (siyuan-note/siyuan#19132)。
+ * 若请求缺失 `app`, 内核无法排除发起者, 广播会回环到写入者自身, 造成插件 onDataChanged 自触发 (siyuan-note/siyuan#19187);
+ */
+const APP_EXCLUDE_SINCE_KERNEL_VERSION = '3.8.3';
+
+const kernelSupportsAppExclude = (): boolean => {
+    try {
+        return siyuanVersion().compare(APP_EXCLUDE_SINCE_KERNEL_VERSION) >= 0;
+    } catch {
+        // 内核版本不可用时按旧版处理, 保持请求行为不变
+        return false;
+    }
+};
+
+const currentAppId = (): string | undefined => window.siyuan?.ws?.app?.appId;
 
 
 export async function request(url: string, data: any, returnType: 'data' | 'response' = 'data') {
@@ -404,8 +423,8 @@ export async function getFile(path: string, type?: "text" | "json"): Promise<str
 
 /**
  * fetchPost will secretly convert data into json, this func merely return Blob
- * @param endpoint 
- * @returns 
+ * @param endpoint
+ * @returns
  */
 export const getFileBlob = async (path: string): Promise<Blob | null> => {
     const endpoint = '/api/file/getFile'
@@ -437,14 +456,31 @@ export async function putFile(path: string, isDir: boolean, file: File | Blob) {
         form.append('file', new Blob());
     }
 
+    // 内核以该字段排除发起者自身的存储变更广播; 版本满足时才注入
+    if (kernelSupportsAppExclude()) {
+        const appId = currentAppId();
+        if (appId) {
+            form.append('app', appId);
+        }
+    }
+
     let url = '/api/file/putFile';
     return request(url, form);
 }
 
 export async function removeFile(path: string) {
-    let data = {
+    let data: { path: string; app?: string } = {
         path: path
     }
+
+    // 内核以该字段排除发起者自身的存储变更广播; 版本满足时才注入
+    if (kernelSupportsAppExclude()) {
+        const appId = currentAppId();
+        if (appId) {
+            data.app = appId;
+        }
+    }
+
     let url = '/api/file/removeFile';
     return request(url, data);
 }
@@ -494,12 +530,12 @@ export const loadBlob = getFileBlob;
 /**
  * Export Markdown content
  * See {@link https://github.com/siyuan-note/siyuan/issues/14032}
- * @param id 
- * @param options 
+ * @param id
+ * @param options
  * @param options.refMode 2: 锚文本块链; 3: 仅锚文本; 4: 块引用转脚注 + 锚点哈希
  * @param options.embedMode 0: 使用原始文本; 1: 使用 Blockquote
  * @param options.yfm Export YAML information or not
- * @returns 
+ * @returns
  */
 export async function exportMdContent(id: DocumentId, options?: {
     refMode?: 2 | 3 | 4;
